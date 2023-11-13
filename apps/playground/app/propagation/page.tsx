@@ -1,13 +1,12 @@
 'use client'
 
+import {useState} from 'react'
 import type {Props, InteractionAction} from 'sketch-react-loop'
 import {SketchLoop} from 'sketch-react-loop'
-import type {TickEvent} from 'sketch-application'
 import {proxy} from 'valtio'
 import {useSnapshot} from 'valtio/react'
 import {Point} from 'mathutil'
 import {Screen} from 'ui'
-
 import {Simulation} from './simulation'
 
 interface Particle {
@@ -21,19 +20,45 @@ const main = proxy<Main>({
 })
 
 export default function Page(): JSX.Element {
-  const simulation = new Simulation()
+  const [sim, setSim] = useState<Simulation>(new Simulation())
+  // const simulation = new Simulation()
+
+  // Small chance of spawn
+  let p = 0.0001 + Math.random() * 0.002
+  for (let i = 0; i < sim.dim.x * sim.dim.y * p; i++) {
+    sim.setSeed(
+      Math.floor(Math.random() * sim.dim.x),
+      Math.floor(Math.random() * sim.dim.y),
+      255,
+    )
+  }
 
   return (
     <Screen>
       <SketchLoop
-        onTick={simulation.createTickHandler()}
+        onTick={sim.createTickHandler()}
         onInteraction={({type, point}: Parameters<InteractionAction>[0]) => {
           if (type === 'pointerdown') {
-            simulation.setSeed(
-              Math.floor(point.x / simulation.cellSize.x),
-              Math.floor(point.y / simulation.cellSize.y),
-              255,
-            )
+            // sim.setSeed(
+            //   Math.floor(point.x / sim.cellSize.x),
+            //   Math.floor(point.y / sim.cellSize.y),
+            //   255,
+            // )
+
+            // random % chance of a spawn
+            p = 0.0005 + Math.random() * 0.002
+            for (let i = 0; i < sim.dim.x * sim.dim.y * p; i++) {
+              // sim.toggleCell(
+              //   Math.floor(Math.random() * sim.dim.x),
+              //   Math.floor(Math.random() * sim.dim.y),
+              //   true
+              // )
+              sim.setSeed(
+                Math.floor(Math.random() * sim.dim.x),
+                Math.floor(Math.random() * sim.dim.y),
+                255,
+              )
+            }
           }
         }}
       />

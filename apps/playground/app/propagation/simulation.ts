@@ -1,22 +1,7 @@
 import type {TickAction} from 'sketch-react-loop'
 
-import type {TickHandler, TickEvent, CtxApplication} from 'sketch-application'
 import {Point, Rect} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
-
-type TickParams = Parameters<TickAction>[0]
-
-function rateLimiter(fps: number, cb: TickAction): TickAction {
-  const budget = 1000 / fps
-  let last = 0
-  return function rateLimited(params) {
-    last = last + params.dt
-    if (last > budget) {
-      cb(params)
-      last = last - budget
-    }
-  }
-}
 
 type Action = [idx: number, value: number]
 
@@ -43,7 +28,7 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    this.dim = Point.of(800, 500)
+    this.dim = Point.of(400, 200)
     this.cellSize = Point.of(10, 10)
     this.frame = Rect.of(
       this.origin.x,
@@ -57,8 +42,11 @@ export class Simulation implements BaseSimulation {
     this.cells = new Uint8Array(buffer)
 
     this.actions = new Set()
-    this.rateLimiter = new RateLimiter(20)
+    this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
+
+    this.cells[400 * 123 + 24] = 255
+    this.cells[3400] = 255
   }
 
   private render: TickAction = ({app}) => {
@@ -97,24 +85,33 @@ export class Simulation implements BaseSimulation {
         continue
       }
 
+      // Shield
+      if (value < 16) {
+        this.actions.add([idx, 0])
+        continue
+      }
+
+      const strength = Math.floor(value * 0.95)
+      const decay = Math.floor(value * 0.75)
+
       // Propagate
       if (this.cells[idx - this.dim.x] === 0) {
-        this.actions.add([idx - this.dim.x, value * 0.85])
+        this.actions.add([idx - this.dim.x, strength])
       }
 
       if (this.cells[idx + 1] === 0) {
-        this.actions.add([idx + 1, value * 0.85])
+        this.actions.add([idx + 1, strength])
       }
 
       if (this.cells[idx + this.dim.x] === 0) {
-        this.actions.add([idx + this.dim.x, value * 0.85])
+        this.actions.add([idx + this.dim.x, strength])
       }
 
       if (this.cells[idx - 1] === 0) {
-        this.actions.add([idx - 1, value * 0.85])
+        this.actions.add([idx - 1, strength])
       }
 
-      this.actions.add([idx, value < 16 ? 0 : value * 0.5])
+      this.actions.add([idx, decay])
     }
 
     for (const action of this.actions) {
@@ -133,6 +130,7 @@ export class Simulation implements BaseSimulation {
   }
 
   setSeed(x: number, y: number, value: number): void {
-    this.cells[y * this.dim.x + x] = value
+    // this.cells[y * this.dim.x + x] = value
+    this.actions.add([y * this.dim.x + x, value])
   }
 }

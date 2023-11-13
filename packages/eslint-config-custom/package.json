@@ -11,6 +11,10 @@
     "./next": {
       "require": "./next.cjs",
       "import": "./next.cjs"
+    },
+    "./library": {
+      "require": "./library.cjs",
+      "import": "./library.cjs"
     }
   },
   "private": true,

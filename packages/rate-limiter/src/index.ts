@@ -1,6 +1,6 @@
 import type {TickHandler} from 'sketch-application'
 
-export class RateLimiter<T extends TickHandler<any>> {
+export class RateLimiter<T extends TickHandler<unknown>> {
   #budget: number
   #last: number
   #handlers: Set<T>
@@ -11,7 +11,7 @@ export class RateLimiter<T extends TickHandler<any>> {
     this.#handlers = new Set()
   }
 
-  register(cb: T) {
+  register(cb: T): () => void {
     this.#handlers.add(cb)
 
     // dispose
@@ -22,10 +22,10 @@ export class RateLimiter<T extends TickHandler<any>> {
     }
   }
 
-  apply = (params: Parameters<T>[0]) => {
+  apply = (params: Parameters<T>[0]): void => {
     this.#last = this.#last + params.dt
     if (this.#last > this.#budget) {
-      for (let handler of this.#handlers) {
+      for (const handler of this.#handlers) {
         handler(params)
       }
       this.#last = this.#last - this.#budget
