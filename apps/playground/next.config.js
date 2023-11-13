@@ -1,10 +1,11 @@
 /** @type {import('next').NextConfig} */
-import {createVanillaExtractPlugin} from '@vanilla-extract/next-plugin'
+const {createVanillaExtractPlugin} = require('@vanilla-extract/next-plugin')
+
 const withVanillaExtract = createVanillaExtractPlugin()
 
 const config = {
   reactStrictMode: true,
-  transpilePackages: ['ui'],
+  transpilePackages: ['ui', '@ca/rate-limiter'],
 }
 
 module.exports = withVanillaExtract(config)

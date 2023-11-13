@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ca/rate-limiter": "workspace:*",
     "clsx": "^2.0.0",
+    "mathutil": "^4.1.3",
     "next": "^13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ui": "workspace:*"
+    "sketch-application": "^0.5.1",
+    "sketch-react-loop": "^0.6.0",
+    "ui": "workspace:*",
+    "valtio": "^1.12.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.19",

@@ -7,7 +7,7 @@
   "exports": {
     ".": {
       "import": "./src/index.tsx",
-      "require":"./src/index.tsx",
+      "require": "./src/index.tsx",
       "type": "./src/index.tsx"
     }
   },
@@ -25,5 +25,8 @@
     "react": "^18.2.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@vanilla-extract/css": "^1.14.0"
   }
 }

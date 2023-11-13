@@ -1,4 +1,5 @@
 const {resolve} = require('node:path')
+const {rules} = require('./custom-rules.cjs')
 
 const project = resolve(process.cwd(), 'tsconfig.json')
 
@@ -38,6 +39,6 @@ module.exports = {
   // add rules configurations here
   rules: {
     'import/no-default-export': 'off',
-    'import/order': 'off',
+    ...rules,
   },
 }
