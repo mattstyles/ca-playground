@@ -5,7 +5,7 @@ const withVanillaExtract = createVanillaExtractPlugin()
 
 const config = {
   reactStrictMode: true,
-  transpilePackages: ['ui', '@ca/rate-limiter'],
+  transpilePackages: ['ui', '@ca/rate-limiter', '@ca/trace'],
 }
 
 module.exports = withVanillaExtract(config)

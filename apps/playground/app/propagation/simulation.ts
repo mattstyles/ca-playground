@@ -2,8 +2,13 @@ import type {TickAction} from 'sketch-react-loop'
 
 import {Point, Rect} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
+import {Trace} from '@ca/trace'
+
+export const trace = new Trace()
 
 type Action = [idx: number, value: number]
+
+trace.set('foo', 'bar')
 
 interface BaseSimulation {
   origin: Point
@@ -36,7 +41,7 @@ export class Simulation implements BaseSimulation {
       this.origin.x + this.dim.x,
       this.origin.y + this.dim.y,
     )
-    this.updateFps = 20
+    this.updateFps = 5
 
     const buffer = new ArrayBuffer(this.dim.x * this.dim.y)
     this.cells = new Uint8Array(buffer)
@@ -50,7 +55,8 @@ export class Simulation implements BaseSimulation {
   }
 
   private render: TickAction = ({app}) => {
-    const start = performance.now()
+    // const start = performance.now()
+    const timer = trace.getTimer('render')
 
     app.ctx.fillStyle = '#f6f6f8'
     app.ctx.fillRect(
@@ -74,6 +80,7 @@ export class Simulation implements BaseSimulation {
     }
 
     // console.log('render', performance.now() - start)
+    timer.track()
   }
 
   private update: TickAction = () => {
@@ -114,6 +121,7 @@ export class Simulation implements BaseSimulation {
       this.actions.add([idx, decay])
     }
 
+    // Update board state
     for (const action of this.actions) {
       this.cells[action[0]] = action[1]
     }
@@ -130,7 +138,6 @@ export class Simulation implements BaseSimulation {
   }
 
   setSeed(x: number, y: number, value: number): void {
-    // this.cells[y * this.dim.x + x] = value
     this.actions.add([y * this.dim.x + x, value])
   }
 }
