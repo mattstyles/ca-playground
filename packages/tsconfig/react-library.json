@@ -6,6 +6,6 @@
     "jsx": "react-jsx",
     "emitDeclarationOnly": true,
     "lib": ["ES2015", "DOM"],
-    "target": "es6"
+    "target": "es2017"
   }
 }
