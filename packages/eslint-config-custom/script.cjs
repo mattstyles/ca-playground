@@ -20,10 +20,6 @@ module.exports = {
   parserOptions: {
     project,
   },
-  globals: {
-    React: true,
-    JSX: true,
-  },
   settings: {
     'import/resolver': {
       typescript: {
@@ -34,5 +30,10 @@ module.exports = {
   ignorePatterns: ['node_modules/', 'dist/'],
   rules: {
     ...rules,
+    'import/no-extraneous-dependencies': [
+      'error',
+      {devDependencies: ['**/*.test.*', '**/*.spec.*', '**/*.bench.*']},
+    ],
+    'no-console': 'off',
   },
 }

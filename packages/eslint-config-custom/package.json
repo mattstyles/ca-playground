@@ -15,6 +15,10 @@
     "./library": {
       "require": "./library.cjs",
       "import": "./library.cjs"
+    },
+    "./script": {
+      "require": "./script.cjs",
+      "import": "./script.cjs"
     }
   },
   "private": true,
