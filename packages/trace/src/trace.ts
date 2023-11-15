@@ -58,16 +58,17 @@ export class Trace {
       timer = this.data.timers.set(key, new Timer(key)).get(key) as Timer
     }
 
-    // const timer = this.data.timers.get(key) ?? new Timer(key)
     timer.start()
     return timer
   }
 
   /**
    * Returns a proxied version of the variable being tracked which allows the tracer to react to changes in the variable
+   *
+   * @deprecated trace won't handle primitives without requiring code changes, which is not what we are after at all. Shame.
    */
-  on<T extends string | number>(key: string, variable: T): T {
-    return this.data.trackers.set(key, variable).get(key) as T
+  on<T extends string | number>(key: string, variable: number): number {
+    return variable
   }
 
   /**
@@ -77,6 +78,9 @@ export class Trace {
     this.data.trackers.set(key, value)
   }
 
+  /**
+   * Returns the proxy for snapshots
+   */
   getProxy(): TraceDataShape {
     return this.data
   }

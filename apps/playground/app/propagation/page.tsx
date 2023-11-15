@@ -16,10 +16,10 @@ export default function Page(): JSX.Element {
 
   // Small chance of spawn
   let p = 0.0001 + Math.random() * 0.002
-  for (let i = 0; i < sim.dim.x * sim.dim.y * p; i++) {
-    sim.setSeed(
-      Math.floor(Math.random() * sim.dim.x),
-      Math.floor(Math.random() * sim.dim.y),
+  for (let i = 0; i < sim.world.size.x * sim.world.size.y * p; i++) {
+    sim.setCell(
+      Math.floor(Math.random() * sim.world.size.x),
+      Math.floor(Math.random() * sim.world.size.y),
       255,
     )
   }
@@ -39,19 +39,20 @@ export default function Page(): JSX.Element {
 
               // random % chance of a spawn
               p = 0.0005 + Math.random() * 0.002
-              for (let i = 0; i < sim.dim.x * sim.dim.y * p; i++) {
-                // sim.toggleCell(
-                //   Math.floor(Math.random() * sim.dim.x),
-                //   Math.floor(Math.random() * sim.dim.y),
-                //   true
-                // )
-                sim.setSeed(
-                  Math.floor(Math.random() * sim.dim.x),
-                  Math.floor(Math.random() * sim.dim.y),
+              for (
+                let i = 0;
+                i < sim.world.size.x * sim.world.size.y * p;
+                i++
+              ) {
+                sim.setCell(
+                  Math.floor(Math.random() * sim.world.size.x),
+                  Math.floor(Math.random() * sim.world.size.y),
                   255,
                 )
               }
             }
+
+            return false
           }}
         />
         <Tron />

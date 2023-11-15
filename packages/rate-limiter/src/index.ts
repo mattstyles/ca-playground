@@ -31,4 +31,8 @@ export class RateLimiter<T extends TickHandler<unknown>> {
       this.#last = this.#last - this.#budget
     }
   }
+
+  setFps(fps: number): void {
+    this.#budget = 1000 / fps
+  }
 }
