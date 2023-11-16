@@ -123,7 +123,7 @@ bench
   .add('Array - pre-allocated - random access', () => {
     // eslint-disable-next-line @typescript-eslint/prefer-for-of -- want to keep tests with consistent iteration method
     for (let idx = 0; idx < arrPR.length; idx++) {
-      const i = (Math.random() * view3.length) | 0
+      const i = (Math.random() * arrPR.length) | 0
       arrPR[i] = arrPR[i] + 1
       if (arrPR[i] >= 255) {
         arrPR[i] = 0

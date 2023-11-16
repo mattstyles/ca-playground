@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
-    "bench": "ts-node --esm ./scripts/struct.ts"
+    "bench:struct": "ts-node --esm ./scripts/struct.ts"
   },
   "devDependencies": {
     "@types/node": "^20.5.2",
