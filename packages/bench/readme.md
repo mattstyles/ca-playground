@@ -2,6 +2,14 @@
 
 Benchmarks can be notoriously hard to use accurately. We use them hear to test for any clear strategies that can be used and compare against those different strategies rather than worrying about the raw numbers which come out.
 
+## Findings
+
+Should be taken with a pinch of salt.
+
+- Arrays are fast for sequential access, faster than typed arrays for smaller sets, losing out as the list grows
+- For loops are still fastest
+- Avoid creating variables within loops, probably related to the GC (not always evident in these tests)
+
 ## Some notes about benchmarks
 
 We started off being smart about sharing stratgies, like iterating with a for...loop _across_ different data structures, but it created problems. For example:
