@@ -107,7 +107,6 @@ export class Simulation implements BaseSimulation {
   private update: TickAction = () => {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
-    // const kernel = [-stride, 1, stride, -1]
     const kernel = createPresetKernel(KernelPresets.Cardinal, {
       stride: stride,
     })
