@@ -32,7 +32,7 @@ export enum KernelPresets {
  * @param params - parameters required to create the kernel
  * @returns Kernel
  */
-export function makePresetKernel(
+export function createPresetKernel(
   preset: KernelPresets,
   params: KernelParams,
 ): Kernel {

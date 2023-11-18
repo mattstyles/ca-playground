@@ -29,6 +29,9 @@ importers:
       '@ca/fn':
         specifier: workspace:*
         version: link:../../packages/fn
+      '@ca/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
       '@ca/rate-limiter':
         specifier: workspace:*
         version: link:../../packages/rate-limiter
@@ -130,6 +133,34 @@ importers:
 
   packages/fn:
     dependencies:
+      mathutil:
+        specifier: ^5.1.0
+        version: 5.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20.5.2
+        version: 20.5.2
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
+      vite:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@20.5.2)
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6
+
+  packages/kernel:
+    dependencies:
+      '@ca/fn':
+        specifier: workspace:*
+        version: link:../fn
       mathutil:
         specifier: ^5.1.0
         version: 5.1.0

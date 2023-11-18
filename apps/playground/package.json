@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ca/fn": "workspace:*",
+    "@ca/kernel": "workspace:*",
     "@ca/rate-limiter": "workspace:*",
     "@ca/trace": "workspace:*",
     "@ca/world": "workspace:*",

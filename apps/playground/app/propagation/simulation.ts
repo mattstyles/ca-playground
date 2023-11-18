@@ -1,10 +1,17 @@
 import type {TickAction} from 'sketch-react-loop'
+import type {BaseWorld} from '@ca/world'
 
 import {Point, Rect} from 'mathutil'
 import {each} from '@ca/fn'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
-import {World, makeKernel, KernelVariants} from '@ca/world'
+import {World} from '@ca/world'
+import {
+  type Kernel,
+  createKernel,
+  createPresetKernel,
+  KernelPresets,
+} from '@ca/kernel'
 
 export const trace = new Trace()
 
@@ -101,7 +108,7 @@ export class Simulation implements BaseSimulation {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
     // const kernel = [-stride, 1, stride, -1]
-    const kernel = makeKernel(KernelVariants.Cardinal, {
+    const kernel = createPresetKernel(KernelPresets.Cardinal, {
       stride: stride,
     })
     let value = 0
@@ -144,6 +151,7 @@ export class Simulation implements BaseSimulation {
         }
       }
 
+      // This is a little slower then both methods above
       // each((im) => {
       //   if (this.world.getCell(idx + im) === 0) {
       //     this.actions.add([idx + im, strength])
