@@ -14,7 +14,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
-    "bench:struct": "ts-node --esm ./scripts/struct.ts"
+    "bench:struct": "ts-node --esm ./scripts/struct.ts",
+    "bench:kernel": "ts-node --esm ./scripts/kernel-iteration.ts"
   },
   "devDependencies": {
     "@types/node": "^20.5.2",
@@ -24,6 +25,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@ca/kernel": "workspace:*",
     "mathutil": "^5.0.1",
     "tinybench": "^2.5.1"
   }

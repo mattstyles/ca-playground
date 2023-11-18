@@ -96,6 +96,9 @@ importers:
 
   packages/bench:
     dependencies:
+      '@ca/kernel':
+        specifier: workspace:*
+        version: link:../kernel
       mathutil:
         specifier: ^5.0.1
         version: 5.1.0

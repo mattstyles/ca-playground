@@ -1,17 +1,15 @@
-import {isEven} from '@ca/fn/comparators'
-
 export type Point = [x: number, y: number]
 export type WeightedOffset<T> = [number, T]
 
 /**
  * The kernel refers to index offsets from the current 1D location
  */
-export type Kernel = Array<number>
+export type Kernel<T> = Array<T>
 
 /**
  * Kernel offsets to apply from the current index
  */
-export type KernelOffsets<T> = Array<T>
+// export type KernelOffsets<T> = Array<T>
 
 /**
  * A weighted kernel specifies offsets from the current index with a weight to apply to that offset value.
@@ -27,7 +25,8 @@ export enum KernelPresets {
 }
 
 /**
- * Creates a kernel from a set of offsets
+ * Creates a 1d kernel from a set of offsets
+ *
  * @param variant - list of preset kernel configurations @see KernelVariants enum
  * @param params - parameters required to create the kernel
  * @returns Kernel
@@ -35,67 +34,48 @@ export enum KernelPresets {
 export function createPresetKernel(
   preset: KernelPresets,
   params: KernelParams,
-): Kernel {
+): Kernel<number> {
   switch (preset) {
     case KernelPresets.Moore:
-      return makeMooreKernel(params)
+      return createKernel1d(presets[KernelPresets.Moore], params.stride)
     case KernelPresets.Cardinal:
-      // return makeCardinalKernel(params)
-      return createKernel(presets[KernelPresets.Cardinal], params.stride)
+      return createKernel1d(presets[KernelPresets.Cardinal], params.stride)
   }
 }
 
-function isKernelOffset<T>(k: unknown): k is KernelOffsets<T> {
-  return Array.isArray(k)
-}
-
-function makeMooreKernel(params: KernelParams): Kernel {
-  return [0 - params.stride - 1]
-}
-
-function makeCardinalKernel(params: KernelParams): Kernel {
-  return [
-    0 - params.stride, // top
-    1, // right
-    params.stride, // bottom
-    -1, // left
-  ]
-}
-
-const presets: Record<KernelPresets, KernelOffsets<Point>> = {
+/**
+ * Presets always inscribe the origin cell.
+ */
+export const presets: Record<KernelPresets, Kernel<Point>> = {
   [KernelPresets.Cardinal]: [
     [0, -1],
     [1, 0],
+    [0, 0],
     [0, 1],
     [-1, 0],
   ],
-  [KernelPresets.Moore]: [],
+  [KernelPresets.Moore]: createKernel2d(3, 3),
 }
 
 /**
  * Offset 2d array with respect to a certain index.
- * The offsets are always centered on a given index. Supply an odd number for width and height.
+ * The offsets are always centered on a given index.
  *
  * @param w - width of kernel
  * @param h - height of kernel
  */
-export function createKernel2dOffsets(
+export function createKernel2d(
   w: number,
   h: number,
-): KernelOffsets<Point> {
-  if (isEven(w) || isEven(h)) {
-    throw new Error(
-      '[Kernel] Kernels must be centered on a single cell. Width and height parameters should be odd numbers.',
-    )
-  }
-
+  buffer: Kernel<Point> = [],
+): Kernel<Point> {
   // Calculate offsets
-  const wo = (w - 1) * 0.5
-  const ho = (h - 1) * 0.5
-  const offsets: KernelOffsets<Point> = []
+  const ow = w >> 1
+  const oh = h >> 1
+  const offsets: Kernel<Point> = buffer
   // Populate 2d kernel offsets
-  for (let j = 0 - ho; j < h - ho; j++) {
-    for (let i = 0 - wo; i < w - wo; i++) {
+  for (let j = 0 - oh; j < h - oh; j++) {
+    for (let i = 0 - ow; i < w - ow; i++) {
       offsets.push([i, j])
     }
   }
@@ -109,15 +89,41 @@ export function createKernel2dOffsets(
  * @param offsets - 2d offsets
  * @param stride - stride to apply, this is typically the x size of a 2d grid
  */
-export function createKernel(
-  offsets: KernelOffsets<Point>,
+export function createKernel1d(
+  offsets: Kernel<Point>,
   stride: number,
-): Kernel {
-  const kernel: Kernel = []
+  buffer: Array<number> = [],
+): Kernel<number> {
+  const kernel: Kernel<number> = buffer
   for (const [x, y] of offsets) {
     kernel.push(x + y * stride)
   }
   return kernel
 }
 
-// @TODO use kernel to create a convolution
+/**
+ * Translates a kernel into indices based on an origin index
+ *
+ * @param kernel - the kernel to use as a transform
+ * @param idx - the origin index
+ * @param src - source/search space
+ * @param size - 2d dimensions of the search space
+ * @param outputBuffer - the storage buffer for the output
+ */
+export function translateKernel(
+  kernel: Kernel<Point>,
+  idx: number,
+  src: ArrayLike<number>,
+  size: Point,
+  outputBuffer: Uint8ClampedArray,
+): void {
+  // let index = 0
+  // for (const translation of kernel) {
+  //   // Does this need to pull from the world array data?
+  //   // i.e. do we need a buffer describing the full data set, and another describing the translated kernel, if so, we need to understand the dimensions for edge case resolution
+  //   buffer[index++] = buffer[idx + translation]
+  // }
+}
+// @TODO use kernel to create a convolution with edge wrapping
+
+// function translatePoint(idx: number, p: Point, size: Point): number {}
