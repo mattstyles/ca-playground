@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ca/fn": "workspace:*",
     "@ca/rate-limiter": "workspace:*",
     "@ca/trace": "workspace:*",
+    "@ca/world": "workspace:*",
     "clsx": "^2.0.0",
-    "mathutil": "^4.2.0",
+    "mathutil": "^5.1.0",
     "next": "^13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

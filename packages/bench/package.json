@@ -24,7 +24,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "mathutil": "^4.2.0",
+    "mathutil": "^5.0.1",
     "tinybench": "^2.5.1"
   }
 }

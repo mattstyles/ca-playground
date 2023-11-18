@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/prefer-for-of -- we are comparing for loops */
 import type {BenchmarkConfig, BaseBenchmark} from './bench.ts'
 
-import {Point} from 'mathutil/point'
+import {Point, doom} from 'mathutil'
 
 abstract class StructBaseBench implements BaseBenchmark {
   size: Point
@@ -204,6 +204,25 @@ class ArrayRandomAccessBench extends StructBaseBench {
   }
 }
 
+class ArrayRandomAccessFastBench extends StructBaseBench {
+  data: Array<number>
+  rng: ReturnType<typeof doom>
+
+  constructor(x: number, y: number) {
+    super(x, y)
+    this.data = Array.from({length: x * y}).map((_) => 0)
+    this.rng = doom()
+  }
+
+  run = (): void => {
+    for (let idx = 0; idx < this.data.length; idx++) {
+      const rnd = this.rng()
+      const cell = this.data[rnd]
+      this.data[rnd] = cell >= 255 ? 0 : cell + 1
+    }
+  }
+}
+
 class TypedArrayRandomAccessBench extends StructBaseBench {
   data: Uint8ClampedArray
 
@@ -217,7 +236,8 @@ class TypedArrayRandomAccessBench extends StructBaseBench {
     for (let idx = 0; idx < this.data.length; idx++) {
       const rnd = (Math.random() * this.data.length) | 0
       const cell = this.data[rnd]
-      this.data[rnd] = cell >= 255 ? 0 : cell + 1
+      // this.data[rnd] = cell >= 255 ? 0 : cell + 1
+      this.data[rnd] = cell & 0xff
     }
   }
 }
@@ -289,7 +309,10 @@ class MapForEachBench extends StructBaseBench {
   }
 }
 
-export function createBenchmarks(x: number, y: number): Array<BenchmarkConfig> {
+export function createStructureSuite(
+  x: number,
+  y: number,
+): Array<BenchmarkConfig> {
   return [
     {
       name: 'Array - pre-alloc, for loop',
@@ -335,6 +358,10 @@ export function createBenchmarks(x: number, y: number): Array<BenchmarkConfig> {
     {
       name: 'Array - random access',
       bench: new ArrayRandomAccessBench(x, y),
+    },
+    {
+      name: 'Array - random access from table',
+      bench: new ArrayRandomAccessFastBench(x, y),
     },
     {
       name: 'Typed array - random access',

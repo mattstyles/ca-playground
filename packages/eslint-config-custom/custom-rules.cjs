@@ -12,4 +12,7 @@ exports.rules = {
       ignoreDifferentlyNamedParameters: true,
     },
   ],
+
+  // react
+  'react/jsx-sort-props': 'off',
 }

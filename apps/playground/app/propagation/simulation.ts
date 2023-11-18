@@ -1,9 +1,10 @@
 import type {TickAction} from 'sketch-react-loop'
 
 import {Point, Rect} from 'mathutil'
+import {each} from '@ca/fn'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
-import {World} from './world'
+import {World} from '@ca/world'
 
 export const trace = new Trace()
 
@@ -47,8 +48,7 @@ export class Simulation implements BaseSimulation {
     this.updateFps = 20
     this.world = new World(500, 200)
 
-    const buffer = new ArrayBuffer(this.world.size.x * this.world.size.y)
-    this.cells = new Uint8Array(buffer)
+    this.cells = new Uint8Array(this.world.size.x * this.world.size.y)
 
     this.actions = new Set()
     this.rateLimiter = new RateLimiter(this.updateFps)
@@ -68,7 +68,6 @@ export class Simulation implements BaseSimulation {
 
     const padding = 1
     for (let idx = 0; idx < this.world.data.length; idx++) {
-      // if (this.cells[idx] > 0) {
       if (this.world.getCell(idx)) {
         app.ctx.fillStyle = '#2d3032' + this.world.getCell(idx).toString(16)
         app.ctx.fillRect(
@@ -79,12 +78,26 @@ export class Simulation implements BaseSimulation {
         )
       }
     }
+    // Surprisingly, this is slightly slower :(
+    // each((_, idx) => {
+    //   if (this.world.getCell(idx)) {
+    //     app.ctx.fillStyle = '#2d3032' + this.world.getCell(idx).toString(16)
+    //     app.ctx.fillRect(
+    //       (idx % this.world.size.x) * this.cellSize.x + padding,
+    //       (idx / this.world.size.x) * this.cellSize.y + padding,
+    //       this.cellSize.x - padding,
+    //       this.cellSize.y - padding,
+    //     )
+    //   }
+    // }, this.world.data)
 
     timer.track()
   }
 
   private update: TickAction = () => {
     const timer = trace.getTimer('update')
+    const stride = this.world.size.x
+    const kernel = [-stride, 1, stride, -1]
     let value = 0
     for (let idx = 0; idx < this.world.data.length; idx++) {
       value = this.world.getCell(idx)
@@ -102,21 +115,34 @@ export class Simulation implements BaseSimulation {
       const decay = Math.floor(value * 0.75)
 
       // Propagate
-      if (this.world.getCell(idx - this.world.size.x) === 0) {
-        this.actions.add([idx - this.world.size.x, strength])
+      // if (this.world.getCell(idx - this.world.size.x) === 0) {
+      //   this.actions.add([idx - this.world.size.x, strength])
+      // }
+
+      // if (this.world.getCell(idx + 1) === 0) {
+      //   this.actions.add([idx + 1, strength])
+      // }
+
+      // if (this.world.getCell(idx + this.world.size.x) === 0) {
+      //   this.actions.add([idx + this.world.size.x, strength])
+      // }
+
+      // if (this.world.getCell(idx - 1) === 0) {
+      //   this.actions.add([idx - 1, strength])
+      // }
+
+      // This is, perhaps, a fraction slower than the above
+      for (const im of kernel) {
+        if (this.world.getCell(idx + im) === 0) {
+          this.actions.add([idx + im, strength])
+        }
       }
 
-      if (this.world.getCell(idx + 1) === 0) {
-        this.actions.add([idx + 1, strength])
-      }
-
-      if (this.world.getCell(idx + this.world.size.x) === 0) {
-        this.actions.add([idx + this.world.size.x, strength])
-      }
-
-      if (this.world.getCell(idx - 1) === 0) {
-        this.actions.add([idx - 1, strength])
-      }
+      // each((im) => {
+      //   if (this.world.getCell(idx + im) === 0) {
+      //     this.actions.add([idx + im, strength])
+      //   }
+      // }, kernel)
 
       this.actions.add([idx, decay])
     }

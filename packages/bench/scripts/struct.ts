@@ -1,12 +1,12 @@
 import {Point} from 'mathutil/point'
 import {Bench} from 'tinybench'
 
-import {createBenchmarks} from '../src/struct.ts'
+import {createStructureSuite} from '../src/struct.ts'
 
 const size = Point.of(1000, 1000)
 const bench = new Bench({time: 100})
 
-const marks = createBenchmarks(size.x, size.y)
+const marks = createStructureSuite(size.x, size.y)
 marks.forEach((mark) => {
   bench.add(mark.name, mark.bench.run)
 })

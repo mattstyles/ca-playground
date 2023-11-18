@@ -14,9 +14,7 @@ export class World implements BaseWorld<Uint8ClampedArray> {
 
   constructor(x: number, y: number) {
     this.size = Point.of(x, y)
-
-    const buffer = new ArrayBuffer(x * y)
-    this.data = new Uint8ClampedArray(buffer)
+    this.data = new Uint8ClampedArray(x * y)
   }
 
   setCell(x: number, y: number, value: number): void

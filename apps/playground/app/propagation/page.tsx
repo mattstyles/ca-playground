@@ -38,7 +38,8 @@ export default function Page(): JSX.Element {
               // )
 
               // random % chance of a spawn
-              p = 0.0005 + Math.random() * 0.002
+              // p = 0.0005 + Math.random() * 0.002
+              p = 0.0005
               for (
                 let i = 0;
                 i < sim.world.size.x * sim.world.size.y * p;
