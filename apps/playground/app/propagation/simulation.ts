@@ -4,7 +4,7 @@ import {Point, Rect} from 'mathutil'
 import {each} from '@ca/fn'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
-import {World} from '@ca/world'
+import {World, makeKernel, KernelVariants} from '@ca/world'
 
 export const trace = new Trace()
 
@@ -38,7 +38,7 @@ export class Simulation implements BaseSimulation {
   constructor() {
     this.origin = Point.of(0, 0)
     // this.dim = Point.of(400, 200)
-    this.cellSize = Point.of(3, 3)
+    this.cellSize = Point.of(7, 7)
     // this.frame = Rect.of(
     //   this.origin.x,
     //   this.origin.y,
@@ -46,7 +46,7 @@ export class Simulation implements BaseSimulation {
     //   this.origin.y + this.world.size.dim.y,
     // )
     this.updateFps = 20
-    this.world = new World(500, 200)
+    this.world = new World(500, 260)
 
     this.cells = new Uint8Array(this.world.size.x * this.world.size.y)
 
@@ -69,7 +69,10 @@ export class Simulation implements BaseSimulation {
     const padding = 1
     for (let idx = 0; idx < this.world.data.length; idx++) {
       if (this.world.getCell(idx)) {
-        app.ctx.fillStyle = '#2d3032' + this.world.getCell(idx).toString(16)
+        // Its probably the hex toString here that is slow rather than the alpha
+        // Might get more change out of a gradient function that takes the cell value and returns hex characters, it might not be as smooth though but if values are all integers we could do this as a table lookup
+        // app.ctx.fillStyle = '#2d3032' + this.world.getCell(idx).toString(16)
+        app.ctx.fillStyle = '#2d3032'
         app.ctx.fillRect(
           (idx % this.world.size.x) * this.cellSize.x + padding,
           (idx / this.world.size.x) * this.cellSize.y + padding,
@@ -97,7 +100,10 @@ export class Simulation implements BaseSimulation {
   private update: TickAction = () => {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
-    const kernel = [-stride, 1, stride, -1]
+    // const kernel = [-stride, 1, stride, -1]
+    const kernel = makeKernel(KernelVariants.Cardinal, {
+      stride: stride,
+    })
     let value = 0
     for (let idx = 0; idx < this.world.data.length; idx++) {
       value = this.world.getCell(idx)
