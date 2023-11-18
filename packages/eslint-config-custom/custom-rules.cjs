@@ -3,7 +3,7 @@ exports.rules = {
   'prefer-template': 'off',
   eqeqeq: ['error', 'smart'],
   'no-bitwise': 'off',
-  'object-shorthand': 'always',
+  'object-shorthand': ['error', 'always'],
   '@typescript-eslint/no-unused-vars': 'warn',
   '@typescript-eslint/array-type': 'off',
   '@typescript-eslint/non-nullable-type-assertion-style': 'off',

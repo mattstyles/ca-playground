@@ -1,5 +1,5 @@
 {
-  "name": "@ca/fn",
+  "name": "@ca/kernel",
   "version": "0.0.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -11,10 +11,7 @@
       "types": "./src/index.ts"
     },
     "./iterators": {
-      "default": "./src/iterators.ts" 
-    },
-    "./comparators": {
-      "default": "./src/comparators.ts"
+      "default": "./iterators.ts" 
     }
   },
   "license": "MIT",
@@ -31,6 +28,7 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
+    "@ca/fn": "workspace:*",
     "mathutil": "^5.1.0"
   }
 }
