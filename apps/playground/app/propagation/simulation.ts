@@ -6,12 +6,7 @@ import {each} from '@ca/fn'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
-import {
-  type Kernel,
-  createKernel,
-  createPresetKernel,
-  KernelPresets,
-} from '@ca/kernel'
+import {createPresetKernel, KernelPresets} from '@ca/kernel'
 
 export const trace = new Trace()
 
@@ -82,7 +77,7 @@ export class Simulation implements BaseSimulation {
         app.ctx.fillStyle = '#2d3032'
         app.ctx.fillRect(
           (idx % this.world.size.x) * this.cellSize.x + padding,
-          (idx / this.world.size.x) * this.cellSize.y + padding,
+          Math.floor(idx / this.world.size.x) * this.cellSize.y + padding,
           this.cellSize.x - padding,
           this.cellSize.y - padding,
         )
