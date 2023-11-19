@@ -1,0 +1,31 @@
+{
+  "name": "ca-perf",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@ca/fn": "workspace:*",
+    "@ca/kernel": "workspace:*",
+    "@ca/rate-limiter": "workspace:*",
+    "@ca/trace": "workspace:*",
+    "@ca/world": "workspace:*",
+    "clsx": "^2.0.0",
+    "mathutil": "^5.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sketch-application": "^0.5.0",
+    "sketch-loop": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  }
+}
