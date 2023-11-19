@@ -64,6 +64,10 @@ export class Simulation implements BaseSimulation {
     // }
 
     this.#applyActions()
+
+    // Set trace
+    trace.set('World size', `[${this.world.size.x}, ${this.world.size.y}]`)
+    trace.set('Cells', this.world.data.length)
   }
 
   private render: TickAction = ({app}) => {
@@ -134,6 +138,7 @@ export class Simulation implements BaseSimulation {
       //   }
       // }
 
+      // This is about 4-5ms faster
       neighbours = this.world.getNumNeighbours(idx)
 
       // Dead cell
