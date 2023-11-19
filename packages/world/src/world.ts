@@ -37,4 +37,101 @@ export class World implements BaseWorld<Uint8ClampedArray> {
 
     return this.data[y * this.size.x + x]
   }
+
+  /** ------------ */
+  // Non-toroidal (i.e. no wrapping)
+  // For speed we're going to avoid allocate and do things manually
+  getNumNeighbours(idx: number): number {
+    // Top-left corner
+    if (idx === 0) {
+      return (
+        this.data[idx + 1] +
+        this.data[idx + this.size.x] +
+        this.data[idx + this.size.x + 1]
+      )
+    }
+
+    // Top-right corner
+    if (idx === this.size.x - 1) {
+      return (
+        this.data[idx - 1] +
+        this.data[idx + this.size.x - 1] +
+        this.data[idx + this.size.x]
+      )
+    }
+
+    // Bottom-left corner
+    if (idx === this.data.length - this.size.x) {
+      return (
+        this.data[idx - this.size.x] +
+        this.data[idx - this.size.x + 1] +
+        this.data[idx + 1]
+      )
+    }
+
+    // Bottom-right corner
+    if (idx === this.data.length - 1) {
+      return (
+        this.data[idx - this.size.x - 1] +
+        this.data[idx - this.size.x] +
+        this.data[idx - 1]
+      )
+    }
+
+    // Top edge
+    if (idx < this.size.x) {
+      return (
+        this.data[idx - 1] +
+        this.data[idx + 1] +
+        this.data[idx + this.size.x - 1] +
+        this.data[idx + this.size.x] +
+        this.data[idx + this.size.x + 1]
+      )
+    }
+
+    // Bottom edge
+    if (idx > this.data.length - this.size.x) {
+      return (
+        this.data[idx - this.size.x - 1] +
+        this.data[idx - this.size.x] +
+        this.data[idx - this.size.x + 1] +
+        this.data[idx - 1] +
+        this.data[idx + 1]
+      )
+    }
+
+    // Left edge
+    if (idx % this.size.x === 0) {
+      return (
+        this.data[idx - this.size.x] +
+        this.data[idx - this.size.x + 1] +
+        this.data[idx + 1] +
+        this.data[idx + this.size.x] +
+        this.data[idx + this.size.x + 1]
+      )
+    }
+
+    // Right edge
+    if ((idx - (this.size.x - 1)) % this.size.x === 0) {
+      return (
+        this.data[idx - this.size.x - 1] +
+        this.data[idx - this.size.x] +
+        this.data[idx - 1] +
+        this.data[idx + this.size.x - 1] +
+        this.data[idx + this.size.x]
+      )
+    }
+
+    // Fall through, i.e all 8 neighbours
+    return (
+      this.data[idx - this.size.x - 1] +
+      this.data[idx - this.size.x] +
+      this.data[idx - this.size.x + 1] +
+      this.data[idx - 1] +
+      this.data[idx + 1] +
+      this.data[idx + this.size.x - 1] +
+      this.data[idx + this.size.x] +
+      this.data[idx + this.size.x + 1]
+    )
+  }
 }

@@ -34,7 +34,7 @@ export class Simulation implements BaseSimulation {
   constructor() {
     this.origin = Point.of(0, 0)
     // this.world = new World(1200, 600)
-    // this.cellSize = Point.of(3, 3)
+    // this.world.cellsize = Point.of(3, 3)
     this.world = new World(1200, 600)
     this.cellSize = Point.of(3, 3)
     this.updateFps = 20
@@ -43,25 +43,25 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    const stride = 3
     // Set initial state - blinky (more of a perf test than anything else)
-    // for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-    //   for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-    //     this.setCell(x, y - 1, 1)
-    //     this.setCell(x, y, 1)
-    //     this.setCell(x, y + 1, 1)
-    //   }
-    // }
+    const stride = 3
+    for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
+      for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
+        this.setCell(x, y - 1, 1)
+        this.setCell(x, y, 1)
+        this.setCell(x, y + 1, 1)
+      }
+    }
 
     // Set initial state - 25%-75% random
-    const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
-    for (let i = 0; i < this.world.data.length * p; i++) {
-      this.setCell(
-        Math.floor(Math.random() * this.world.size.x),
-        Math.floor(Math.random() * this.world.size.y),
-        1,
-      )
-    }
+    // const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
+    // for (let i = 0; i < this.world.data.length * p; i++) {
+    //   this.setCell(
+    //     Math.floor(Math.random() * this.world.size.x),
+    //     Math.floor(Math.random() * this.world.size.y),
+    //     1,
+    //   )
+    // }
 
     this.#applyActions()
   }
@@ -97,8 +97,8 @@ export class Simulation implements BaseSimulation {
     //       app.ctx.fillRect(
     //         x * this.cellSize.x + padding,
     //         y * this.cellSize.y + padding,
-    //         this.cellSize.x - padding,
-    //         this.cellSize.y - padding,
+    //         this.world.dataize.x - padding,
+    //         this.world.dataize.y - padding,
     //       )
     //     }
     //   }
@@ -120,18 +120,21 @@ export class Simulation implements BaseSimulation {
     // @TODO won't handle edges
     for (let idx = 0; idx < this.world.data.length; idx++) {
       value = this.world.getCell(idx)
-      neighbours = 0
+      // neighbours = 0
 
-      for (const im of kernel) {
-        // Ignore central cell from kernel
-        if (im === 0) {
-          continue
-        }
+      // Iterate over the kernel
+      // for (const im of kernel) {
+      //   // Ignore central cell from kernel
+      //   if (im === 0) {
+      //     continue
+      //   }
 
-        if (this.world.getCell(idx + im) > 0) {
-          neighbours = neighbours + 1
-        }
-      }
+      //   if (this.world.getCell(idx + im) > 0) {
+      //     neighbours = neighbours + 1
+      //   }
+      // }
+
+      neighbours = this.world.getNumNeighbours(idx)
 
       // Dead cell
       if (value === 0 && neighbours === 3) {
@@ -180,6 +183,102 @@ export class Simulation implements BaseSimulation {
     this.update({app: app, dt: 0})
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- test
     this.render({app: app, dt: 0})
+  }
+
+  // Non-toroidal (i.e. no wrapping)
+  // For speed we're going to avoid allocate and do things manually
+  private getNumNeighbours(idx: number): number {
+    // Top-left corner
+    if (idx === 0) {
+      return (
+        this.world.data[idx + 1] +
+        this.world.data[idx + this.world.size.x] +
+        this.world.data[idx + this.world.size.x + 1]
+      )
+    }
+
+    // Top-right corner
+    if (idx === this.world.size.x - 1) {
+      return (
+        this.world.data[idx + this.world.size.x - 1] +
+        this.world.data[idx - 1] +
+        this.world.data[idx + this.world.size.x]
+      )
+    }
+
+    // Bottom-left corner
+    if (idx === this.world.data.length - this.world.size.x) {
+      return (
+        this.world.data[idx - this.world.size.x] +
+        this.world.data[idx - this.world.size.x + 1] +
+        this.world.data[idx + 1]
+      )
+    }
+
+    // Bottom-right corner
+    if (idx === this.world.data.length - 1) {
+      return (
+        this.world.data[idx - this.world.size.x - 1] +
+        this.world.data[idx - this.world.size.x] +
+        this.world.data[idx - 1]
+      )
+    }
+
+    // Top edge
+    if (idx < this.world.size.x) {
+      return (
+        this.world.data[idx - 1] +
+        this.world.data[idx + 1] +
+        this.world.data[idx + this.world.size.x - 1] +
+        this.world.data[idx + this.world.size.x] +
+        this.world.data[idx + this.world.size.x + 1]
+      )
+    }
+
+    // Bottom edge
+    if (idx > this.world.data.length - this.world.size.x) {
+      return (
+        this.world.data[idx - this.world.size.x - 1] +
+        this.world.data[idx - this.world.size.x] +
+        this.world.data[idx - this.world.size.x + 1] +
+        this.world.data[idx - 1] +
+        this.world.data[idx + 1]
+      )
+    }
+
+    // Left edge
+    if (idx % this.world.size.x === 0) {
+      return (
+        this.world.data[idx - this.world.size.x] +
+        this.world.data[idx - this.world.size.x + 1] +
+        this.world.data[idx + 1] +
+        this.world.data[idx + this.world.size.x] +
+        this.world.data[idx + this.world.size.x + 1]
+      )
+    }
+
+    // Right edge
+    if ((idx - (this.world.size.x - 1)) % this.world.size.x === 0) {
+      return (
+        this.world.data[idx - this.world.size.x - 1] +
+        this.world.data[idx - this.world.size.x] +
+        this.world.data[idx - 1] +
+        this.world.data[idx + this.world.size.x - 1] +
+        this.world.data[idx + this.world.size.x]
+      )
+    }
+
+    // Fall through, i.e all 8 neighbours
+    return (
+      this.world.data[idx - this.world.size.x - 1] +
+      this.world.data[idx - this.world.size.x] +
+      this.world.data[idx - this.world.size.x + 1] +
+      this.world.data[idx - 1] +
+      this.world.data[idx + 1] +
+      this.world.data[idx + this.world.size.x - 1] +
+      this.world.data[idx + this.world.size.x] +
+      this.world.data[idx + this.world.size.x + 1]
+    )
   }
 }
 
