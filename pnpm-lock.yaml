@@ -24,6 +24,64 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2
 
+  apps/ca-perf:
+    dependencies:
+      '@ca/fn':
+        specifier: workspace:*
+        version: link:../../packages/fn
+      '@ca/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      '@ca/rate-limiter':
+        specifier: workspace:*
+        version: link:../../packages/rate-limiter
+      '@ca/trace':
+        specifier: workspace:*
+        version: link:../../packages/trace
+      '@ca/world':
+        specifier: workspace:*
+        version: link:../../packages/world
+      clsx:
+        specifier: ^2.0.0
+        version: 2.0.0
+      mathutil:
+        specifier: ^5.1.0
+        version: 5.1.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      sketch-application:
+        specifier: ^0.5.0
+        version: 0.5.1
+      sketch-loop:
+        specifier: ^0.5.0
+        version: 0.5.1
+    devDependencies:
+      '@types/node':
+        specifier: ^17.0.12
+        version: 17.0.45
+      '@types/react':
+        specifier: ^18.0.22
+        version: 18.2.5
+      '@types/react-dom':
+        specifier: ^18.0.7
+        version: 18.2.3
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: ^5.2.2
+        version: 5.2.2
+      vite:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@17.0.45)
+
   apps/playground:
     dependencies:
       '@ca/fn':
@@ -6304,6 +6362,42 @@ packages:
       esbuild: 0.18.20
       postcss: 8.4.31
       rollup: 3.29.4
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
+  /vite@5.0.0(@types/node@17.0.45):
+    resolution: {integrity: sha512-ESJVM59mdyGpsiNAeHQOR/0fqNoOyWPYesFto8FFZugfmhdHx8Fzd8sF3Q/xkVhZsyOxHfdM7ieiVAorI9RjFw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || >=20.0.0
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      '@types/node': 17.0.45
+      esbuild: 0.19.5
+      postcss: 8.4.31
+      rollup: 4.4.1
     optionalDependencies:
       fsevents: 2.3.3
     dev: true

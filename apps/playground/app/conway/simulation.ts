@@ -27,7 +27,6 @@ export class Simulation implements BaseSimulation {
   updateFps: number
   world: World
 
-  cells: Uint8Array
   actions: Set<Action>
   rateLimiter: RateLimiter<TickAction>
 
@@ -35,7 +34,7 @@ export class Simulation implements BaseSimulation {
     this.origin = Point.of(0, 0)
     // this.world = new World(1200, 600)
     // this.world.cellsize = Point.of(3, 3)
-    this.world = new World(1200, 600)
+    this.world = new World(1000, 600)
     this.cellSize = Point.of(3, 3)
     this.updateFps = 20
 
@@ -44,24 +43,24 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter.register(this.update)
 
     // Set initial state - blinky (more of a perf test than anything else)
-    const stride = 3
-    for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-      for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-        this.setCell(x, y - 1, 1)
-        this.setCell(x, y, 1)
-        this.setCell(x, y + 1, 1)
-      }
-    }
+    // const stride = 3
+    // for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
+    //   for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
+    //     this.setCell(x, y - 1, 1)
+    //     this.setCell(x, y, 1)
+    //     this.setCell(x, y + 1, 1)
+    //   }
+    // }
 
     // Set initial state - 25%-75% random
-    // const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
-    // for (let i = 0; i < this.world.data.length * p; i++) {
-    //   this.setCell(
-    //     Math.floor(Math.random() * this.world.size.x),
-    //     Math.floor(Math.random() * this.world.size.y),
-    //     1,
-    //   )
-    // }
+    const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
+    for (let i = 0; i < this.world.data.length * p; i++) {
+      this.setCell(
+        Math.floor(Math.random() * this.world.size.x),
+        Math.floor(Math.random() * this.world.size.y),
+        1,
+      )
+    }
 
     this.#applyActions()
 
@@ -141,15 +140,28 @@ export class Simulation implements BaseSimulation {
       // This is about 4-5ms faster
       neighbours = this.world.getNumNeighbours(idx)
 
-      // Dead cell
-      if (value === 0 && neighbours === 3) {
-        this.actions.add([idx, 1])
+      // // Dead cell
+      // if (value === 0 && neighbours === 3) {
+      //   this.actions.add([idx, 1])
+      //   continue
+      // }
+
+      // // Alive cell
+      // if (neighbours < 2 || neighbours > 3) {
+      //   this.actions.add([idx, 0])
+      // }
+      if (value === 1) {
+        if (neighbours < 2 || neighbours > 3) {
+          // Kill cell
+          this.actions.add([idx, 0])
+        }
         continue
       }
 
-      // Alive cell
-      if (neighbours < 2 || neighbours > 3) {
-        this.actions.add([idx, 0])
+      // Dead cell
+      if (neighbours === 3) {
+        // Birth cell
+        this.actions.add([idx, 1])
       }
     }
 

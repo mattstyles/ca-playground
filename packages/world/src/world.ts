@@ -1,5 +1,8 @@
 import {Point} from 'mathutil'
 
+// Temporary until we have an action system to apply changes
+type Action = [idx: number, value: number]
+
 export interface BaseWorld<T = Uint8Array> {
   size: Point
   data: T
@@ -8,13 +11,20 @@ export interface BaseWorld<T = Uint8Array> {
   getCell: (x: number, y?: number) => number
 }
 
-export class World implements BaseWorld<Uint8ClampedArray> {
+// export class World implements BaseWorld<Uint8ClampedArray> {
+export class World implements BaseWorld {
   size: Point
-  data: Uint8ClampedArray
+  // data: Uint8ClampedArray
+  data: Uint8Array
+  // temp
+  actions: Set<Action>
 
   constructor(x: number, y: number) {
     this.size = Point.of(x, y)
-    this.data = new Uint8ClampedArray(x * y)
+    // this.data = new Uint8ClampedArray(x * y)
+    const buffer = new ArrayBuffer(x * y)
+    this.data = new Uint8Array(x * y)
+    this.actions = new Set()
   }
 
   setCell(x: number, y: number, value: number): void
@@ -133,5 +143,71 @@ export class World implements BaseWorld<Uint8ClampedArray> {
       this.data[idx + this.size.x] +
       this.data[idx + this.size.x + 1]
     )
+  }
+
+  iterate() {
+    let value = 0
+    let neighbours = 0
+    for (let idx = 0; idx < this.data.length; idx++) {
+      // value = this.getCell(idx)
+      value = this.data[idx]
+
+      // neighbours = 0
+
+      // Iterate over the kernel
+      // for (const im of kernel) {
+      //   // Ignore central cell from kernel
+      //   if (im === 0) {
+      //     continue
+      //   }
+
+      //   if (this.world.getCell(idx + im) > 0) {
+      //     neighbours = neighbours + 1
+      //   }
+      // }
+
+      // This is about 4-5ms faster
+      neighbours = this.getNumNeighbours(idx)
+
+      /** Fast -------------------------------------------------- */
+      // Faster because less cells are typically alive in our test cases.
+      if (value === 1) {
+        if (neighbours < 2 || neighbours > 3) {
+          // Kill cell
+          this.actions.add([idx, 0])
+        }
+        continue
+      }
+
+      // Dead cell
+      if (neighbours === 3) {
+        // Birth cell
+        this.actions.add([idx, 1])
+      }
+
+      /** -------------------------------------------------- */
+
+      /** Slow -------------------------------------------------- */
+      // Probably slower because many more cells are dead than alive in our test runs
+      // Dead cell
+      // if (value === 0 && neighbours === 3) {
+      //   this.actions.add([idx, 1])
+      //   continue
+      // }
+
+      // // Alive cell
+      // if (neighbours < 2 || neighbours > 3) {
+      //   this.actions.add([idx, 0])
+      // }
+      /** -------------------------------------------------- */
+    }
+
+    // Update board state
+    // this.#applyActions()
+    for (const action of this.actions) {
+      // this.setCell(action[0], action[1])
+      this.data[action[0]] = action[1]
+    }
+    this.actions.clear()
   }
 }
