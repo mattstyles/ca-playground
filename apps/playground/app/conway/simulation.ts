@@ -32,10 +32,10 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    // this.world = new World(1200, 600)
-    // this.world.cellsize = Point.of(3, 3)
     this.world = new World(1000, 600)
     this.cellSize = Point.of(3, 3)
+    // this.world = new World(500, 320)
+    // this.cellSize = Point.of(5, 5)
     this.updateFps = 20
 
     this.actions = new Set()
@@ -61,6 +61,7 @@ export class Simulation implements BaseSimulation {
         1,
       )
     }
+    trace.set('Initial random population', p.toFixed(3))
 
     this.#applyActions()
 
@@ -80,7 +81,7 @@ export class Simulation implements BaseSimulation {
       this.world.size.y * this.cellSize.y,
     )
 
-    const padding = 1
+    const padding = 0.5
     for (let idx = 0; idx < this.world.data.length; idx++) {
       if (this.world.getCell(idx) > 0) {
         app.ctx.fillStyle = '#2d3032'
@@ -155,6 +156,9 @@ export class Simulation implements BaseSimulation {
           // Kill cell
           this.actions.add([idx, 0])
         }
+        // if (neighbours < 4) {
+        //   this.actions.add([idx, 0])
+        // }
         continue
       }
 
@@ -163,6 +167,10 @@ export class Simulation implements BaseSimulation {
         // Birth cell
         this.actions.add([idx, 1])
       }
+      // if (neighbours >= 5) {
+      //   // Birth cell
+      //   this.actions.add([idx, 1])
+      // }
     }
 
     // Update board state

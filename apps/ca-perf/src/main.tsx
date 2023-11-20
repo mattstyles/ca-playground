@@ -4,6 +4,7 @@ import {Simulation} from './simulation.ts'
 import {Simulation as Simulation2} from './simulation2.ts'
 import {Simulation as Simulation3} from './simulation3.ts'
 import {Simulation as Simulation4} from './simulation4.ts'
+import {Simulation as Simulation2d} from './simulation-2d.ts'
 
 const app = loop({
   container: document.body,
@@ -60,6 +61,19 @@ app.on({
   type: 'tick',
   action: events.update,
 })
+
+/**
+ * 2d dtaa structure approach - surprisingly fast
+ */
+// console.log('simulation 2d')
+// const sim = new Simulation2d()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+// @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
 app.start()
 

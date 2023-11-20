@@ -170,7 +170,7 @@ export class World implements BaseWorld {
       neighbours = this.getNumNeighbours(idx)
 
       /** Fast -------------------------------------------------- */
-      // Faster because less cells are typically alive in our test cases.
+      // Faster because less cells are typically alive so less checks are made.
       if (value === 1) {
         if (neighbours < 2 || neighbours > 3) {
           // Kill cell
@@ -188,7 +188,7 @@ export class World implements BaseWorld {
       /** -------------------------------------------------- */
 
       /** Slow -------------------------------------------------- */
-      // Probably slower because many more cells are dead than alive in our test runs
+      // Slower due to the && check, try nesting them and it is faster
       // Dead cell
       // if (value === 0 && neighbours === 3) {
       //   this.actions.add([idx, 1])
@@ -197,6 +197,26 @@ export class World implements BaseWorld {
 
       // // Alive cell
       // if (neighbours < 2 || neighbours > 3) {
+      //   this.actions.add([idx, 0])
+      // }
+
+      /** -------------------------------------------------- */
+
+      /** Also fast -------------------------------------------------- */
+      // Dead cell
+      // if (value === 0) {
+      //   if (neighbours === 3) {
+      //     this.actions.add([idx, 1])
+      //   }
+      //   continue
+      // }
+
+      // // Alive cell
+      // if (neighbours < 2) {
+      //   this.actions.add([idx, 0])
+      //   continue
+      // }
+      // if (neighbours > 3) {
       //   this.actions.add([idx, 0])
       // }
       /** -------------------------------------------------- */

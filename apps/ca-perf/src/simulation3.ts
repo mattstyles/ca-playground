@@ -4,6 +4,8 @@ import type {ApplicationInstance} from 'sketch-loop'
 // import {Point, Rect} from './struct'
 // import {debugState} from './debug'
 
+import {setUpdate, setRender} from './track.ts'
+
 export class Point {
   x: number
   y: number
@@ -41,7 +43,10 @@ export class Rect {
   }
 }
 
-type TickParams = {app: ApplicationInstance; dt: number}
+interface TickParams {
+  app: ApplicationInstance
+  dt: number
+}
 type TickHandler = (params: TickParams) => void
 function rateLimiter(fps: number, cb: TickHandler): TickHandler {
   const budget = 1000 / fps
@@ -281,6 +286,7 @@ export class Simulation implements CASimulation {
     }
 
     // debugState.renderTime = performance.now() - start
+    setRender(performance.now() - start)
   }
 
   private update() {
@@ -320,5 +326,6 @@ export class Simulation implements CASimulation {
     // console.log('<<')
 
     // debugState.updateTime = performance.now() - start
+    setUpdate(performance.now() - start)
   }
 }

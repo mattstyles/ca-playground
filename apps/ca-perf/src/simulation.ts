@@ -6,6 +6,7 @@ import {RateLimiter} from '@ca/rate-limiter'
 // import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
+import {setUpdate, setRender} from './track.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 
@@ -66,14 +67,10 @@ export class Simulation implements BaseSimulation {
     // }
 
     this.#applyActions()
-
-    // Set trace
-    // trace.set('World size', `[${this.world.size.x}, ${this.world.size.y}]`)
-    // trace.set('Cells', this.world.data.length)
   }
 
   private render: TickAction = ({app}) => {
-    // const timer = trace.getTimer('render')
+    const start = performance.now()
 
     app.ctx.fillStyle = '#f6f6f8'
     app.ctx.fillRect(
@@ -111,9 +108,12 @@ export class Simulation implements BaseSimulation {
     // }
 
     // timer.track()
+    setRender(performance.now() - start)
   }
 
   private update: TickAction = () => {
+    const start = performance.now()
+
     // const timer = trace.getTimer('update')
     // const stride = this.world.size.x
     // const kernel = createPresetKernel(KernelPresets.Moore, {
@@ -143,7 +143,7 @@ export class Simulation implements BaseSimulation {
       // This is about 4-5ms faster
       neighbours = this.world.getNumNeighbours(idx)
 
-      // Dead cell
+      // Dead cell --> this is the slowdown right here
       if (value === 0 && neighbours === 3) {
         this.actions.add([idx, 1])
         continue
@@ -163,6 +163,8 @@ export class Simulation implements BaseSimulation {
     this.actions.clear()
 
     // timer.track()
+
+    setUpdate(performance.now() - start)
   }
 
   #applyActions(): void {
