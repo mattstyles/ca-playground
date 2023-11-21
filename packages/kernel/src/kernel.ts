@@ -1,3 +1,5 @@
+import {wrap} from 'mathutil'
+
 export type Point = [x: number, y: number]
 export type WeightedOffset<T> = [number, T]
 
@@ -90,19 +92,20 @@ export function createKernel2d(
  * @param stride - stride to apply, this is typically the x size of a 2d grid
  */
 export function createKernel1d(
-  offsets: Kernel<Point>,
+  offsets2d: Kernel<Point>,
   stride: number,
   buffer: Array<number> = [],
 ): Kernel<number> {
   const kernel: Kernel<number> = buffer
-  for (const [x, y] of offsets) {
+  for (const [x, y] of offsets2d) {
     kernel.push(x + y * stride)
   }
   return kernel
 }
 
 /**
- * Translates a kernel into indices based on an origin index
+ * Translates a kernel into indices based on an origin index.
+ * Toroidal.
  *
  * @param kernel - the kernel to use as a transform
  * @param idx - the origin index
@@ -123,7 +126,44 @@ export function translateKernel(
   //   // i.e. do we need a buffer describing the full data set, and another describing the translated kernel, if so, we need to understand the dimensions for edge case resolution
   //   buffer[index++] = buffer[idx + translation]
   // }
+
+  const x = idx % size[0]
+  const y = (idx / size[1]) | 0
+  for (const offset of kernel) {
+  }
 }
 // @TODO use kernel to create a convolution with edge wrapping
 
 // function translatePoint(idx: number, p: Point, size: Point): number {}
+
+export function applyToroidal2dOffset(
+  x: number,
+  y: number,
+  ox: number,
+  oy: number,
+  w: number,
+  h: number,
+): [number, number] {
+  return [
+    // eslint-disable-next-line no-nested-ternary -- wrapping
+    x < -ox ? w + ox : x >= w - ox ? ox - 1 : x + ox,
+    // eslint-disable-next-line no-nested-ternary -- wrapping
+    y < -oy ? h + oy : y >= h - oy ? oy - 1 : y + oy,
+  ]
+}
+
+export function applyToroidalPermutedOffset(
+  x: number,
+  y: number,
+  ox: number,
+  oy: number,
+  w: number,
+  h: number,
+): number {
+  return (
+    // eslint-disable-next-line no-nested-ternary -- wrapping
+    (x < -ox ? w + ox : x >= w - ox ? ox - 1 : x + ox) +
+    // eslint-disable-next-line no-nested-ternary -- wrapping
+    (y < -oy ? h + oy : y >= h - oy ? oy - 1 : y + oy) * h
+  )
+}
