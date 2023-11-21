@@ -145,65 +145,148 @@ export class World implements BaseWorld {
     )
   }
 
+  // iterate() {
+  //   let value = 0
+  //   let neighbours = 0
+  //   for (let idx = 0; idx < this.data.length; idx++) {
+  //     // value = this.getCell(idx)
+  //     value = this.data[idx]
+
+  //     // neighbours = 0
+
+  //     // Iterate over the kernel
+  //     // for (const im of kernel) {
+  //     //   // Ignore central cell from kernel
+  //     //   if (im === 0) {
+  //     //     continue
+  //     //   }
+
+  //     //   if (this.world.getCell(idx + im) > 0) {
+  //     //     neighbours = neighbours + 1
+  //     //   }
+  //     // }
+
+  //     // This is about 4-5ms faster
+  //     neighbours = this.getNumNeighbours(idx)
+
+  //     /** Fast -------------------------------------------------- */
+  //     // Faster because less cells are typically alive so less checks are made.
+  //     if (value === 1) {
+  //       if (neighbours < 2 || neighbours > 3) {
+  //         // Kill cell
+  //         this.actions.add([idx, 0])
+  //       }
+  //       continue
+  //     }
+
+  //     // Dead cell
+  //     if (neighbours === 3) {
+  //       // Birth cell
+  //       this.actions.add([idx, 1])
+  //     }
+
+  //     /** -------------------------------------------------- */
+
+  //     /** Slow -------------------------------------------------- */
+  //     // Slower due to the && check, try nesting them and it is faster
+  //     // Dead cell
+  //     // if (value === 0 && neighbours === 3) {
+  //     //   this.actions.add([idx, 1])
+  //     //   continue
+  //     // }
+
+  //     // // Alive cell
+  //     // if (neighbours < 2 || neighbours > 3) {
+  //     //   this.actions.add([idx, 0])
+  //     // }
+
+  //     /** -------------------------------------------------- */
+
+  //     /** Also fast -------------------------------------------------- */
+  //     // Dead cell
+  //     // if (value === 0) {
+  //     //   if (neighbours === 3) {
+  //     //     this.actions.add([idx, 1])
+  //     //   }
+  //     //   continue
+  //     // }
+
+  //     // // Alive cell
+  //     // if (neighbours < 2) {
+  //     //   this.actions.add([idx, 0])
+  //     //   continue
+  //     // }
+  //     // if (neighbours > 3) {
+  //     //   this.actions.add([idx, 0])
+  //     // }
+  //     /** -------------------------------------------------- */
+  //   }
+
   iterate() {
     let value = 0
     let neighbours = 0
     for (let idx = 0; idx < this.data.length; idx++) {
-      // value = this.getCell(idx)
       value = this.data[idx]
 
-      // neighbours = 0
+      neighbours = this.getNumNeighbours(idx)
 
-      // Iterate over the kernel
-      // for (const im of kernel) {
-      //   // Ignore central cell from kernel
-      //   if (im === 0) {
+      //   if (value === 1) {
+      //     if (neighbours < 2 || neighbours > 3) {
+      //       // Kill cell
+      //       this.actions.add([idx, 0])
+      //     }
       //     continue
       //   }
 
-      //   if (this.world.getCell(idx + im) > 0) {
-      //     neighbours = neighbours + 1
+      //   // Dead cell
+      //   if (neighbours === 3) {
+      //     // Birth cell
+      //     this.actions.add([idx, 1])
       //   }
       // }
 
-      // This is about 4-5ms faster
-      neighbours = this.getNumNeighbours(idx)
-
-      /** Fast -------------------------------------------------- */
-      // Faster because less cells are typically alive so less checks are made.
-      if (value === 1) {
-        if (neighbours < 2 || neighbours > 3) {
-          // Kill cell
-          this.actions.add([idx, 0])
+      if (value === 0) {
+        if (neighbours === 3) {
+          this.actions.add([idx, 1])
         }
         continue
       }
 
       // Dead cell
-      if (neighbours === 3) {
-        // Birth cell
-        this.actions.add([idx, 1])
+      if (neighbours < 2 || neighbours > 3) {
+        this.actions.add([idx, 0])
       }
+    }
+
+    // Update board state
+    for (const action of this.actions) {
+      this.data[action[0]] = action[1]
+    }
+    this.actions.clear()
+  }
+
+  iterateSlow() {
+    let value = 0
+    let neighbours = 0
+    for (let idx = 0; idx < this.data.length; idx++) {
+      value = this.data[idx]
+
+      neighbours = this.getNumNeighbours(idx)
 
       /** -------------------------------------------------- */
-
       /** Slow -------------------------------------------------- */
       // Slower due to the && check, try nesting them and it is faster
       // Dead cell
-      // if (value === 0 && neighbours === 3) {
-      //   this.actions.add([idx, 1])
-      //   continue
-      // }
+      if (value === 0 && neighbours === 3) {
+        this.actions.add([idx, 1])
+        continue
+      }
 
-      // // Alive cell
-      // if (neighbours < 2 || neighbours > 3) {
-      //   this.actions.add([idx, 0])
-      // }
+      // Alive cell
+      if (neighbours < 2 || neighbours > 3) {
+        this.actions.add([idx, 0])
+      }
 
-      /** -------------------------------------------------- */
-
-      /** Also fast -------------------------------------------------- */
-      // Dead cell
       // if (value === 0) {
       //   if (neighbours === 3) {
       //     this.actions.add([idx, 1])
@@ -212,20 +295,13 @@ export class World implements BaseWorld {
       // }
 
       // // Alive cell
-      // if (neighbours < 2) {
-      //   this.actions.add([idx, 0])
-      //   continue
-      // }
-      // if (neighbours > 3) {
+      // if (neighbours < 2 || neighbours > 3) {
       //   this.actions.add([idx, 0])
       // }
-      /** -------------------------------------------------- */
     }
 
     // Update board state
-    // this.#applyActions()
     for (const action of this.actions) {
-      // this.setCell(action[0], action[1])
       this.data[action[0]] = action[1]
     }
     this.actions.clear()

@@ -297,39 +297,39 @@ export class Simulation implements CASimulation {
   private update() {
     const start = performance.now()
 
-    // let neighbours = 0
-    // for (const [idx, value] of this.world.data.entries()) {
-    //   neighbours = this.getNumNeighbours(idx)
+    let neighbours = 0
+    for (const [idx, value] of this.world.data.entries()) {
+      neighbours = this.getNumNeighbours(idx)
 
-    //   // Rules
-    //   // Alive cell
-    //   if (value === 1) {
-    //     if (neighbours < 2 || neighbours >= 4) {
-    //       // Kill cell
-    //       this.actions.add([idx, false])
-    //       continue
-    //     }
-    //   }
+      // Rules
+      // Alive cell
+      // if (value === 1) {
+      //   if (neighbours < 2 || neighbours >= 4) {
+      //     // Kill cell
+      //     this.actions.add([idx, false])
+      //     continue
+      //   }
+      // }
 
-    //   // Dead cell
-    //   if (neighbours === 3) {
-    //     // Birth cell
-    //     this.actions.add([idx, true])
-    //   }
+      // // Dead cell
+      // if (neighbours === 3) {
+      //   // Birth cell
+      //   this.actions.add([idx, true])
+      // }
 
-    //   /** ---------------------------------------------------- */
-    //   // // Dead cell
-    //   // if (value === 0 && neighbours === 3) {
-    //   //   this.actions.add([idx, true])
-    //   //   continue
-    //   // }
+      /** ---------------------------------------------------- */
+      // Dead cell
+      // if (value === 0 && neighbours === 3) {
+      //   this.actions.add([idx, true])
+      //   continue
+      // }
 
-    //   // // Alive cell
-    //   // if (neighbours < 2 || neighbours > 3) {
-    //   //   this.actions.add([idx, false])
-    //   // }
-    //   /** ---------------------------------------------------- */
-    // }
+      // // Alive cell
+      // if (neighbours < 2 || neighbours > 3) {
+      //   this.actions.add([idx, false])
+      // }
+      /** ---------------------------------------------------- */
+    }
 
     // // Process actions to update board state
     // for (const action of this.actions) {

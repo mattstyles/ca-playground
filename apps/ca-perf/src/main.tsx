@@ -1,17 +1,18 @@
 import {createRoot} from 'react-dom/client'
 import {loop} from 'sketch-loop'
+import {run} from './bench.ts'
 import {Simulation} from './simulation.ts'
 import {Simulation as Simulation2} from './simulation2.ts'
 import {Simulation as Simulation3} from './simulation3.ts'
 import {Simulation as Simulation4} from './simulation4.ts'
 import {Simulation as Simulation2d} from './simulation-2d.ts'
 
-const app = loop({
-  container: document.body,
-})
+// const app = loop({
+//   container: document.body,
+// })
 
 /**
- * Standardised from packages -\> slower, 2x on sim2
+ * Standardised from packages - slower, see update function
  */
 // console.log('simulation 1')
 // const sim = new Simulation()
@@ -33,7 +34,7 @@ const app = loop({
 // })
 
 /**
- * Raw simulation - fastest
+ * Raw simulation - but uses .entries so slower
  */
 // console.log('simulation 3')
 // const sim = new Simulation3()
@@ -48,19 +49,19 @@ const app = loop({
 // })
 
 /**
- * Raw sim with \@ca/world
+ * Raw sim with \@ca/world - uses .entries though :(
  */
-console.log('simulation 4')
-const sim = new Simulation4()
-const events = sim.getEvents()
-app.on({
-  type: 'tick',
-  action: events.render,
-})
-app.on({
-  type: 'tick',
-  action: events.update,
-})
+// console.log('simulation 4')
+// const sim = new Simulation4()
+// const events = sim.getEvents()
+// app.on({
+//   type: 'tick',
+//   action: events.render,
+// })
+// app.on({
+//   type: 'tick',
+//   action: events.update,
+// })
 
 /**
  * 2d dtaa structure approach - surprisingly fast
@@ -75,7 +76,15 @@ app.on({
 
 // @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
-app.start()
+// app.start()
 
 // console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
 // console.log('Cells:', sim.world.data.length)
+
+/**
+ * Bench marks for iteration order
+ */
+await new Promise((res) => {
+  setTimeout(res, 1000)
+})
+await run()

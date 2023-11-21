@@ -297,7 +297,7 @@ export class Simulation implements CASimulation {
 
     let neighboursAlive = 0
     // Naive, check every cell neighbourhood
-    for (let [idx, value] of this.cells.entries()) {
+    for (const [idx, value] of this.cells.entries()) {
       neighboursAlive = this.getNumNeighbours(idx)
 
       // Rules
@@ -318,7 +318,7 @@ export class Simulation implements CASimulation {
     }
 
     // Process actions to update board state
-    for (let action of this.actions) {
+    for (const action of this.actions) {
       this.cells[action[0]] = Number(action[1])
     }
     this.actions.clear()

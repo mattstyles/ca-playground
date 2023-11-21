@@ -34,7 +34,7 @@ export class Simulation implements BaseSimulation {
   constructor() {
     this.origin = Point.of(0, 0)
     this.cells = Array.from({length: 600}).map((_) => {
-      return Array.from({length: 1000}).map((__) => {
+      return Array.from({length: 1200}).map((__) => {
         return 0
       })
     })
