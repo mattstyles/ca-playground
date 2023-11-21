@@ -1,4 +1,5 @@
 import type {TickAction} from 'sketch-react-loop'
+import type {BaseWorld} from '@ca/world'
 
 import {Point, wrap} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
@@ -34,34 +35,13 @@ export class Simulation implements BaseSimulation {
     this.origin = Point.of(0, 0)
     this.world = new World(1000, 600)
     this.cellSize = Point.of(3, 3)
-    // this.world = new World(500, 320)
-    // this.cellSize = Point.of(5, 5)
     this.updateFps = 20
 
     this.actions = new Set()
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    // Set initial state - blinky (more of a perf test than anything else)
-    // const stride = 3
-    // for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-    //   for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-    //     this.setCell(x, y - 1, 1)
-    //     this.setCell(x, y, 1)
-    //     this.setCell(x, y + 1, 1)
-    //   }
-    // }
-
-    // Set initial state - 25%-75% random
-    const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
-    for (let i = 0; i < this.world.data.length * p; i++) {
-      this.setCell(
-        Math.floor(Math.random() * this.world.size.x),
-        Math.floor(Math.random() * this.world.size.y),
-        1,
-      )
-    }
-    trace.set('Initial random population', p.toFixed(3))
+    setInitialState('random', this.world)
 
     this.#applyActions()
 
@@ -81,7 +61,7 @@ export class Simulation implements BaseSimulation {
       this.world.size.y * this.cellSize.y,
     )
 
-    const padding = 0.5
+    const padding = 1
     for (let idx = 0; idx < this.world.data.length; idx++) {
       if (this.world.getCell(idx) > 0) {
         app.ctx.fillStyle = '#2d3032'
@@ -141,36 +121,18 @@ export class Simulation implements BaseSimulation {
       // This is about 4-5ms faster
       neighbours = this.world.getNumNeighbours(idx)
 
-      // // Dead cell
-      // if (value === 0 && neighbours === 3) {
-      //   this.actions.add([idx, 1])
-      //   continue
-      // }
-
-      // // Alive cell
-      // if (neighbours < 2 || neighbours > 3) {
-      //   this.actions.add([idx, 0])
-      // }
+      // Starvation and competition
       if (value === 1) {
         if (neighbours < 2 || neighbours > 3) {
-          // Kill cell
           this.actions.add([idx, 0])
         }
-        // if (neighbours < 4) {
-        //   this.actions.add([idx, 0])
-        // }
         continue
       }
 
-      // Dead cell
+      // Birth
       if (neighbours === 3) {
-        // Birth cell
         this.actions.add([idx, 1])
       }
-      // if (neighbours >= 5) {
-      //   // Birth cell
-      //   this.actions.add([idx, 1])
-      // }
     }
 
     // Update board state
@@ -209,106 +171,38 @@ export class Simulation implements BaseSimulation {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- test
     this.render({app: app, dt: 0})
   }
-
-  // Non-toroidal (i.e. no wrapping)
-  // For speed we're going to avoid allocate and do things manually
-  private getNumNeighbours(idx: number): number {
-    // Top-left corner
-    if (idx === 0) {
-      return (
-        this.world.data[idx + 1] +
-        this.world.data[idx + this.world.size.x] +
-        this.world.data[idx + this.world.size.x + 1]
-      )
-    }
-
-    // Top-right corner
-    if (idx === this.world.size.x - 1) {
-      return (
-        this.world.data[idx + this.world.size.x - 1] +
-        this.world.data[idx - 1] +
-        this.world.data[idx + this.world.size.x]
-      )
-    }
-
-    // Bottom-left corner
-    if (idx === this.world.data.length - this.world.size.x) {
-      return (
-        this.world.data[idx - this.world.size.x] +
-        this.world.data[idx - this.world.size.x + 1] +
-        this.world.data[idx + 1]
-      )
-    }
-
-    // Bottom-right corner
-    if (idx === this.world.data.length - 1) {
-      return (
-        this.world.data[idx - this.world.size.x - 1] +
-        this.world.data[idx - this.world.size.x] +
-        this.world.data[idx - 1]
-      )
-    }
-
-    // Top edge
-    if (idx < this.world.size.x) {
-      return (
-        this.world.data[idx - 1] +
-        this.world.data[idx + 1] +
-        this.world.data[idx + this.world.size.x - 1] +
-        this.world.data[idx + this.world.size.x] +
-        this.world.data[idx + this.world.size.x + 1]
-      )
-    }
-
-    // Bottom edge
-    if (idx > this.world.data.length - this.world.size.x) {
-      return (
-        this.world.data[idx - this.world.size.x - 1] +
-        this.world.data[idx - this.world.size.x] +
-        this.world.data[idx - this.world.size.x + 1] +
-        this.world.data[idx - 1] +
-        this.world.data[idx + 1]
-      )
-    }
-
-    // Left edge
-    if (idx % this.world.size.x === 0) {
-      return (
-        this.world.data[idx - this.world.size.x] +
-        this.world.data[idx - this.world.size.x + 1] +
-        this.world.data[idx + 1] +
-        this.world.data[idx + this.world.size.x] +
-        this.world.data[idx + this.world.size.x + 1]
-      )
-    }
-
-    // Right edge
-    if ((idx - (this.world.size.x - 1)) % this.world.size.x === 0) {
-      return (
-        this.world.data[idx - this.world.size.x - 1] +
-        this.world.data[idx - this.world.size.x] +
-        this.world.data[idx - 1] +
-        this.world.data[idx + this.world.size.x - 1] +
-        this.world.data[idx + this.world.size.x]
-      )
-    }
-
-    // Fall through, i.e all 8 neighbours
-    return (
-      this.world.data[idx - this.world.size.x - 1] +
-      this.world.data[idx - this.world.size.x] +
-      this.world.data[idx - this.world.size.x + 1] +
-      this.world.data[idx - 1] +
-      this.world.data[idx + 1] +
-      this.world.data[idx + this.world.size.x - 1] +
-      this.world.data[idx + this.world.size.x] +
-      this.world.data[idx + this.world.size.x + 1]
-    )
-  }
 }
 
-function setInitialState(buffer: Uint8ClampedArray): void {
-  buffer[2 * 50 + 2] = 1
-  buffer[2 * 50 + 3] = 1
-  buffer[2 * 50 + 4] = 1
+function setInitialState(
+  strategy: keyof typeof initialStateStrategy,
+  world: BaseWorld,
+): void {
+  initialStateStrategy[strategy](world)
+}
+
+const initialStateStrategy = {
+  // Set initial state - blinky (more of a perf test than anything else)
+  blinky: (world: BaseWorld) => {
+    const stride = 3
+    for (let y = stride; y < world.size.y; y = y + 3 + stride) {
+      for (let x = stride; x < world.size.x; x = x + 3 + stride) {
+        world.setCell(x, y - 1, 1)
+        world.setCell(x, y, 1)
+        world.setCell(x, y + 1, 1)
+      }
+    }
+  },
+  // Set initial state - 25%-75% random
+  random: (world: BaseWorld) => {
+    const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
+    for (let i = 0; i < world.data.length * p; i++) {
+      world.setCell(
+        Math.floor(Math.random() * world.size.x),
+        Math.floor(Math.random() * world.size.y),
+        1,
+      )
+    }
+
+    trace.set('Initial random population:', p.toFixed(3))
+  },
 }
