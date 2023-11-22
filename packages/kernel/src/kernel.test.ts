@@ -8,8 +8,11 @@ import {
   createKernel1d,
   createKernel2d,
   presets,
-  applyToroidal2dOffset,
   applyToroidalPermutedOffset,
+  applyToroidalOffset,
+  translateKernel,
+  applyKernel,
+  apply2dKernel,
 } from './kernel.ts'
 
 test('Create preset kernel', () => {
@@ -139,7 +142,7 @@ test('Apply toroidal offset', () => {
     const output = []
     for (const offset of kernel) {
       output.push(
-        applyToroidal2dOffset(
+        applyToroidalOffset(
           origin[0],
           origin[1],
           offset[0],
@@ -181,4 +184,53 @@ test('Apply permuted toroidal offset', () => {
     }
     expect(output).toStrictEqual(expected)
   }
+})
+
+test('Translate kernel to world space indices', () => {
+  const size: Point = [5, 5]
+  const kernel = presets[KernelPresets.Moore]
+
+  expect(translateKernel(kernel, 6, size)).toStrictEqual(
+    Array.from([0, 1, 2, 5, 6, 7, 10, 11, 12]),
+  )
+
+  const buffer = new Array(kernel.length)
+  translateKernel(kernel, 0, size, buffer)
+  expect(buffer).toStrictEqual(Array.from([24, 20, 21, 4, 0, 1, 9, 5, 6]))
+})
+
+test('Apply 2d kernel to world space indices', () => {
+  const src = [
+    [0, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [0, 0, 3, 0, 0],
+    [0, 0, 0, 0, 0],
+    [1, 2, 0, 0, 0],
+  ].flat()
+  const size: Point = [5, 5]
+  const kernel = presets[KernelPresets.Moore]
+
+  expect(apply2dKernel(kernel, 6, size, src)).toStrictEqual(
+    Array.from([0, 0, 0, 1, 0, 0, 0, 0, 3]),
+  )
+
+  const buffer = new Array(kernel.length)
+  apply2dKernel(kernel, 0, size, src, buffer)
+  expect(buffer).toStrictEqual(Array.from([0, 1, 2, 0, 0, 0, 0, 1, 0]))
+})
+
+test('Translate and apply kernel', () => {
+  const src = [
+    [0, 1, 0, 0, 0],
+    [1, 0, 3, 0, 0],
+    [0, 2, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [1, 2, 0, 0, 0],
+  ].flat()
+  const size: Point = [5, 5]
+  const kernel = presets[KernelPresets.Moore]
+
+  // idx = 6 [1, 1]
+  const t = translateKernel(kernel, 6, size)
+  expect(applyKernel(t, src)).toStrictEqual([0, 1, 0, 1, 0, 3, 0, 2, 0])
 })

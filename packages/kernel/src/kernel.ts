@@ -1,5 +1,3 @@
-import {wrap} from 'mathutil'
-
 export type Point = [x: number, y: number]
 export type WeightedOffset<T> = [number, T]
 
@@ -104,39 +102,114 @@ export function createKernel1d(
 }
 
 /**
- * Translates a kernel into indices based on an origin index.
+ * Translates a kernel into search space indices based on an origin index.
  * Toroidal.
  *
- * @param kernel - the kernel to use as a transform
+ * @param kernel - the 2d  kernel to use as a transform
  * @param idx - the origin index
- * @param src - source/search space
  * @param size - 2d dimensions of the search space
- * @param outputBuffer - the storage buffer for the output
+ * @param buffer - the storage buffer for the generated indices
  */
 export function translateKernel(
   kernel: Kernel<Point>,
   idx: number,
-  src: ArrayLike<number>,
   size: Point,
-  outputBuffer: Uint8ClampedArray,
-): void {
-  // let index = 0
-  // for (const translation of kernel) {
-  //   // Does this need to pull from the world array data?
-  //   // i.e. do we need a buffer describing the full data set, and another describing the translated kernel, if so, we need to understand the dimensions for edge case resolution
-  //   buffer[index++] = buffer[idx + translation]
-  // }
-
+  buffer?: Kernel<number>,
+): Kernel<number> {
+  const b = buffer || Array.from({length: kernel.length})
   const x = idx % size[0]
   const y = (idx / size[1]) | 0
-  for (const offset of kernel) {
+  for (let i = 0; i < kernel.length; i++) {
+    b[i] = applyToroidalPermutedOffset(
+      x,
+      y,
+      kernel[i][0],
+      kernel[i][1],
+      size[0],
+      size[1],
+    )
   }
+  return b
 }
-// @TODO use kernel to create a convolution with edge wrapping
 
-// function translatePoint(idx: number, p: Point, size: Point): number {}
+/**
+ * Returns a buffer that contains the contents of each cell described by a kernel from the origin index.
+ * Toroidal.
+ *
+ * @param kernel - the 2d kernel to use as a transform
+ * @param idx - the origin index
+ * @param size - 2d dimensions of the search space
+ * @param src - the full search space to index against
+ * @param buffer - the storage buffer for the output
+ * @returns
+ */
+export function apply2dKernel<T>(
+  kernel: Kernel<Point>,
+  idx: number,
+  size: Point,
+  src: ArrayLike<T>,
+  buffer?: Array<T>,
+): Array<T> {
+  const b = buffer || Array.from({length: kernel.length})
+  for (let i = 0; i < kernel.length; i++) {
+    const x = idx % size[0]
+    const y = (idx / size[1]) | 0
+    const target = applyToroidalPermutedOffset(
+      x,
+      y,
+      kernel[i][0],
+      kernel[i][1],
+      size[0],
+      size[1],
+    )
+    b[i] = src[target]
+  }
+  return b
+}
 
-export function applyToroidal2dOffset(
+/**
+ * Returns a buffer that contains the contents of each cell described by a kernel of discrete indices.
+ * Toroidal.
+ *
+ * @param kernel - the 2d kernel to use as a transform
+ * @param idx - the origin index
+ * @param size - 2d dimensions of the search space
+ * @param src - the full search space to index against
+ * @param buffer - the storage buffer for the output
+ * @returns
+ */
+export function applyKernel<T>(
+  kernel: Kernel<number>,
+  src: ArrayLike<T>,
+  buffer?: Array<T>,
+): Array<T> {
+  const b = buffer || Array.from({length: kernel.length})
+  for (let i = 0; i < kernel.length; i++) {
+    b[i] = src[kernel[i]]
+  }
+  return b
+}
+
+// Convolution rule application
+// export function convolve(
+//   kernel: Kernel<Point>,
+//   buffer: Uint8ClampedArray,
+//   rules: Uint8ClampedArray
+// )
+
+/**
+ * Calculates a given offset from an origin coordinate in 2d space.
+ * Returns a coordinate in 2d space.
+ *
+ * @param x - origin x coord
+ * @param y - origin y coord
+ * @param ox - offset in the x dimension
+ * @param oy - offset in the y dimension
+ * @param w - size of search space in x dimension
+ * @param h - size of search space in y dimension
+ * @returns
+ */
+export function applyToroidalOffset(
   x: number,
   y: number,
   ox: number,
@@ -152,6 +225,18 @@ export function applyToroidal2dOffset(
   ]
 }
 
+/**
+ * Calculates a given offset from an origin coordinate in 2d space.
+ * Returns an index in 1d space.
+ *
+ * @param x - origin x coord
+ * @param y - origin y coord
+ * @param ox - offset in the x dimension
+ * @param oy - offset in the y dimension
+ * @param w - size of search space in x dimension
+ * @param h - size of search space in y dimension
+ * @returns
+ */
 export function applyToroidalPermutedOffset(
   x: number,
   y: number,
