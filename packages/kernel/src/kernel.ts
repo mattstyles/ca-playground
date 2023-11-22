@@ -1,24 +1,12 @@
 export type Point = [x: number, y: number]
-export type WeightedOffset<T> = [number, T]
 
 /**
- * The kernel refers to index offsets from the current 1D location
+ * The kernel refers describes a weighting function.
+ * In our case this describes the weight for a given offset.
+ * We can then apply those offsets to generate indices into our source data and apply weights to handle the convolution.
  */
-export type Kernel<T> = Array<T>
+export type Kernel<T> = Array<[number, T]>
 
-/**
- * Kernel offsets to apply from the current index
- */
-// export type KernelOffsets<T> = Array<T>
-
-/**
- * A weighted kernel specifies offsets from the current index with a weight to apply to that offset value.
- */
-export type WeightedOffsets<T> = Array<WeightedOffset<T>>
-
-interface KernelParams {
-  stride: number
-}
 export enum KernelPresets {
   Moore,
   Cardinal,
@@ -31,15 +19,12 @@ export enum KernelPresets {
  * @param params - parameters required to create the kernel
  * @returns Kernel
  */
-export function createPresetKernel(
-  preset: KernelPresets,
-  params: KernelParams,
-): Kernel<number> {
+export function createPresetKernel(preset: KernelPresets): Kernel<Point> {
   switch (preset) {
     case KernelPresets.Moore:
-      return createKernel1d(presets[KernelPresets.Moore], params.stride)
+      return presets[KernelPresets.Moore]
     case KernelPresets.Cardinal:
-      return createKernel1d(presets[KernelPresets.Cardinal], params.stride)
+      return presets[KernelPresets.Cardinal]
   }
 }
 
@@ -48,35 +33,43 @@ export function createPresetKernel(
  */
 export const presets: Record<KernelPresets, Kernel<Point>> = {
   [KernelPresets.Cardinal]: [
-    [0, -1],
-    [1, 0],
-    [0, 0],
-    [0, 1],
-    [-1, 0],
+    [1, [0, -1]],
+    [1, [1, 0]],
+    [1, [0, 0]],
+    [1, [0, 1]],
+    [1, [-1, 0]],
   ],
-  [KernelPresets.Moore]: createKernel2d(3, 3),
+  [KernelPresets.Moore]: createKernel2d(3, 3, [1, 1, 1, 1, 0, 1, 1, 1, 1]),
 }
 
 /**
- * Offset 2d array with respect to a certain index.
- * The offsets are always centered on a given index.
+ * Array of offsets with respect to a certain index in two dimensional space.
  *
  * @param w - width of kernel
  * @param h - height of kernel
+ * @param weights - the initial weights of all elements. Note that the origin will be 0 weighted initially despite this value.
  */
 export function createKernel2d(
   w: number,
   h: number,
-  buffer: Kernel<Point> = [],
+  weights: Array<number>,
 ): Kernel<Point> {
-  // Calculate offsets
+  if (weights.length !== w * h) {
+    throw new Error(
+      `Weights supplied to kernel do not match length of the kernel. [${weights.join(
+        ',',
+      )}].length does not equal ${w} * ${h} (${w * h})`,
+    )
+  }
+  // Calculate offset ranges from midpoints of given lengths
   const ow = w >> 1
   const oh = h >> 1
-  const offsets: Kernel<Point> = buffer
-  // Populate 2d kernel offsets
+  const offsets: Kernel<Point> = []
+  let idx = 0
+  // Populate 2d kernel weights and offsets
   for (let j = 0 - oh; j < h - oh; j++) {
     for (let i = 0 - ow; i < w - ow; i++) {
-      offsets.push([i, j])
+      offsets.push([weights[idx++], [i, j]])
     }
   }
 
@@ -90,13 +83,12 @@ export function createKernel2d(
  * @param stride - stride to apply, this is typically the x size of a 2d grid
  */
 export function createKernel1d(
-  offsets2d: Kernel<Point>,
+  kernel2d: Kernel<Point>,
   stride: number,
-  buffer: Array<number> = [],
 ): Kernel<number> {
-  const kernel: Kernel<number> = buffer
-  for (const [x, y] of offsets2d) {
-    kernel.push(x + y * stride)
+  const kernel: Kernel<number> = []
+  for (const [w, [x, y]] of kernel2d) {
+    kernel.push([w, x + y * stride])
   }
   return kernel
 }
@@ -114,22 +106,17 @@ export function translateKernel(
   kernel: Kernel<Point>,
   idx: number,
   size: Point,
-  buffer?: Kernel<number>,
 ): Kernel<number> {
-  const b = buffer || Array.from({length: kernel.length})
+  const buffer: Kernel<number> = []
   const x = idx % size[0]
   const y = (idx / size[1]) | 0
-  for (let i = 0; i < kernel.length; i++) {
-    b[i] = applyToroidalPermutedOffset(
-      x,
-      y,
-      kernel[i][0],
-      kernel[i][1],
-      size[0],
-      size[1],
-    )
+  for (const [weight, point] of kernel) {
+    buffer.push([
+      weight,
+      applyToroidalPermutedOffset(x, y, point[0], point[1], size[0], size[1]),
+    ])
   }
-  return b
+  return buffer
 }
 
 /**
@@ -141,30 +128,27 @@ export function translateKernel(
  * @param size - 2d dimensions of the search space
  * @param src - the full search space to index against
  * @param buffer - the storage buffer for the output
- * @returns
+ * @returns buffer containing values from source array
  */
-export function apply2dKernel<T>(
+export function applyKernel2d(
   kernel: Kernel<Point>,
   idx: number,
   size: Point,
-  src: ArrayLike<T>,
-  buffer?: Array<T>,
-): Array<T> {
-  const b = buffer || Array.from({length: kernel.length})
-  for (let i = 0; i < kernel.length; i++) {
-    const x = idx % size[0]
-    const y = (idx / size[1]) | 0
+  src: ArrayLike<number>,
+): Array<number> {
+  const buffer: Array<number> = []
+  for (const [weight, point] of kernel) {
     const target = applyToroidalPermutedOffset(
-      x,
-      y,
-      kernel[i][0],
-      kernel[i][1],
+      idx % size[0],
+      (idx / size[1]) | 0,
+      point[0],
+      point[1],
       size[0],
       size[1],
     )
-    b[i] = src[target]
+    buffer.push(src[target] * weight)
   }
-  return b
+  return buffer
 }
 
 /**
@@ -172,30 +156,39 @@ export function apply2dKernel<T>(
  * Toroidal.
  *
  * @param kernel - the 2d kernel to use as a transform
- * @param idx - the origin index
- * @param size - 2d dimensions of the search space
  * @param src - the full search space to index against
  * @param buffer - the storage buffer for the output
- * @returns
+ * @returns buffer containing values from the source array
  */
-export function applyKernel<T>(
+export function applyKernel(
   kernel: Kernel<number>,
-  src: ArrayLike<T>,
-  buffer?: Array<T>,
-): Array<T> {
+  src: ArrayLike<number>,
+  buffer?: Array<number>,
+): Array<number> {
   const b = buffer || Array.from({length: kernel.length})
   for (let i = 0; i < kernel.length; i++) {
-    b[i] = src[kernel[i]]
+    b[i] = src[kernel[i][1]] * kernel[i][0]
   }
   return b
 }
 
-// Convolution rule application
-// export function convolve(
-//   kernel: Kernel<Point>,
-//   buffer: Uint8ClampedArray,
-//   rules: Uint8ClampedArray
-// )
+/**
+ * The convolution takes a kernel and the target source, along with an origin index, and returns a value.
+ * @param kernel - 2d kernel to use as a transform
+ * @param idx - index of the origin cell
+ * @param size - point describing dimensions of the source array
+ * @param src - source array to operate against
+ * @param reducer - function that takes the result of the kernel application and returns a value
+ */
+export function convolve2d<T>(
+  kernel: Kernel<Point>,
+  idx: number,
+  size: Point,
+  src: ArrayLike<number>,
+  reducer: (src: Array<number>) => T,
+): T {
+  return reducer(applyKernel2d(kernel, idx, size, src))
+}
 
 /**
  * Calculates a given offset from an origin coordinate in 2d space.

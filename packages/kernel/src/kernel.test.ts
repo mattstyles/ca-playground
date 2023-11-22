@@ -12,45 +12,41 @@ import {
   applyToroidalOffset,
   translateKernel,
   applyKernel,
-  apply2dKernel,
+  applyKernel2d,
+  convolve2d,
 } from './kernel.ts'
 
 test('Create preset kernel', () => {
   const mooreOffsets = presets[KernelPresets.Moore]
-  expect(mooreOffsets).toContainEqual([-1, -1])
-  expect(mooreOffsets).toContainEqual([0, -1])
-  expect(mooreOffsets).toContainEqual([1, -1])
-  expect(mooreOffsets).toContainEqual([-1, 0])
-  expect(mooreOffsets).toContainEqual([0, 0])
-  expect(mooreOffsets).toContainEqual([1, 0])
-  expect(mooreOffsets).toContainEqual([-1, 1])
-  expect(mooreOffsets).toContainEqual([0, 1])
-  expect(mooreOffsets).toContainEqual([1, 1])
+  expect(mooreOffsets).toContainEqual([1, [-1, -1]])
+  expect(mooreOffsets).toContainEqual([1, [0, -1]])
+  expect(mooreOffsets).toContainEqual([1, [1, -1]])
+  expect(mooreOffsets).toContainEqual([1, [-1, 0]])
+  expect(mooreOffsets).toContainEqual([0, [0, 0]])
+  expect(mooreOffsets).toContainEqual([1, [1, 0]])
+  expect(mooreOffsets).toContainEqual([1, [-1, 1]])
+  expect(mooreOffsets).toContainEqual([1, [0, 1]])
+  expect(mooreOffsets).toContainEqual([1, [1, 1]])
   expect(mooreOffsets.length).toBe(3 * 3)
 })
 
 test('Create 2d kernel', () => {
-  const kernel: Kernel<Point> = createKernel2d(3, 1)
-  expect(kernel).toContainEqual([-1, 0])
-  expect(kernel).toContainEqual([0, 0])
-  expect(kernel).toContainEqual([1, 0])
+  const kernel: Kernel<Point> = createKernel2d(3, 1, [1, 1, 0.5])
+  expect(kernel).toContainEqual([1, [-1, 0]])
+  expect(kernel).toContainEqual([1, [0, 0]])
+  expect(kernel).toContainEqual([0.5, [1, 0]])
   expect(kernel.length).toBe(3)
 })
 
 test('Create 1d kernel', () => {
   const offsets: Kernel<Point> = [
-    [1, 1],
-    [0, -1],
+    [1, [1, 1]],
+    [1, [0, -1]],
   ]
   const kernel = createKernel1d(offsets, 9)
-  expect(kernel).toContain(10)
-  expect(kernel).toContain(-9)
+  expect(kernel).toContainEqual([1, 10])
+  expect(kernel).toContainEqual([1, -9])
   expect(kernel.length).toBe(2)
-})
-
-test('Create preset kernel', () => {
-  const kernel = createPresetKernel(KernelPresets.Moore, {stride: 6})
-  expect(kernel).toEqual([-7, -6, -5, -1, 0, 1, 5, 6, 7])
 })
 
 test('Apply toroidal offset', () => {
@@ -145,8 +141,8 @@ test('Apply toroidal offset', () => {
         applyToroidalOffset(
           origin[0],
           origin[1],
-          offset[0],
-          offset[1],
+          offset[1][0],
+          offset[1][1],
           size.x,
           size.y,
         ),
@@ -175,8 +171,8 @@ test('Apply permuted toroidal offset', () => {
         applyToroidalPermutedOffset(
           origin[0],
           origin[1],
-          offset[0],
-          offset[1],
+          offset[1][0],
+          offset[1][1],
           size.x,
           size.y,
         ),
@@ -191,12 +187,18 @@ test('Translate kernel to world space indices', () => {
   const kernel = presets[KernelPresets.Moore]
 
   expect(translateKernel(kernel, 6, size)).toStrictEqual(
-    Array.from([0, 1, 2, 5, 6, 7, 10, 11, 12]),
+    Array.from([
+      [1, 0],
+      [1, 1],
+      [1, 2],
+      [1, 5],
+      [0, 6],
+      [1, 7],
+      [1, 10],
+      [1, 11],
+      [1, 12],
+    ]),
   )
-
-  const buffer = new Array(kernel.length)
-  translateKernel(kernel, 0, size, buffer)
-  expect(buffer).toStrictEqual(Array.from([24, 20, 21, 4, 0, 1, 9, 5, 6]))
 })
 
 test('Apply 2d kernel to world space indices', () => {
@@ -210,13 +212,9 @@ test('Apply 2d kernel to world space indices', () => {
   const size: Point = [5, 5]
   const kernel = presets[KernelPresets.Moore]
 
-  expect(apply2dKernel(kernel, 6, size, src)).toStrictEqual(
+  expect(applyKernel2d(kernel, 6, size, src)).toStrictEqual(
     Array.from([0, 0, 0, 1, 0, 0, 0, 0, 3]),
   )
-
-  const buffer = new Array(kernel.length)
-  apply2dKernel(kernel, 0, size, src, buffer)
-  expect(buffer).toStrictEqual(Array.from([0, 1, 2, 0, 0, 0, 0, 1, 0]))
 })
 
 test('Translate and apply kernel', () => {
@@ -233,4 +231,30 @@ test('Translate and apply kernel', () => {
   // idx = 6 [1, 1]
   const t = translateKernel(kernel, 6, size)
   expect(applyKernel(t, src)).toStrictEqual([0, 1, 0, 1, 0, 3, 0, 2, 0])
+})
+
+test('Convolution over 2d search space', () => {
+  const src = [
+    [0, 1, 0, 0, 0],
+    [1, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0],
+  ].flat()
+  const size: Point = [5, 5]
+  const kernel = createPresetKernel(KernelPresets.Moore)
+
+  const sum = (nums: Array<number>): number => {
+    let total = 0
+    for (const value of nums) {
+      total = total + value
+    }
+    return total
+  }
+
+  // idx = 6 [1, 1] => 4 alive neighbours
+  expect(convolve2d(kernel, 6, size, src, sum)).toBe(4)
+
+  // Origin cell should be weighted out of a Moore kernel
+  expect(convolve2d(kernel, 7, size, src, sum)).toBe(2)
 })

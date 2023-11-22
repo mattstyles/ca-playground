@@ -42,7 +42,6 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter.register(this.update)
 
     setInitialState('random', this.world)
-
     this.#applyActions()
 
     // Set trace
@@ -94,9 +93,7 @@ export class Simulation implements BaseSimulation {
   private update: TickAction = () => {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
-    const kernel = createPresetKernel(KernelPresets.Moore, {
-      stride: stride,
-    })
+    const kernel = createPresetKernel(KernelPresets.Moore)
 
     let value = 0
     let neighbours = 0

@@ -7,9 +7,9 @@ import {Simulation as Simulation3} from './simulation3.ts'
 import {Simulation as Simulation4} from './simulation4.ts'
 import {Simulation as Simulation2d} from './simulation-2d.ts'
 
-// const app = loop({
-//   container: document.body,
-// })
+const app = loop({
+  container: document.body,
+})
 
 /**
  * Standardised from packages - slower, see update function
@@ -76,7 +76,7 @@ import {Simulation as Simulation2d} from './simulation-2d.ts'
 
 // @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
-// app.start()
+app.start()
 
 // console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
 // console.log('Cells:', sim.world.data.length)
@@ -84,7 +84,7 @@ import {Simulation as Simulation2d} from './simulation-2d.ts'
 /**
  * Bench marks for iteration order
  */
-await new Promise((res) => {
-  setTimeout(res, 1000)
-})
-await run()
+// await new Promise((res) => {
+//   setTimeout(res, 1000)
+// })
+// await run()
