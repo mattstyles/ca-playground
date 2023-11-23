@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- debug file */
 import {createRoot} from 'react-dom/client'
 import {loop} from 'sketch-loop'
 import {run} from './bench.ts'
@@ -5,6 +6,7 @@ import {Simulation} from './simulation.ts'
 import {Simulation as Simulation2} from './simulation2.ts'
 import {Simulation as Simulation3} from './simulation3.ts'
 import {Simulation as Simulation4} from './simulation4.ts'
+import {Simulation as Simulation5} from './simulation5.ts'
 import {Simulation as Simulation2d} from './simulation-2d.ts'
 
 const app = loop({
@@ -64,7 +66,18 @@ const app = loop({
 // })
 
 /**
- * 2d dtaa structure approach - surprisingly fast
+ * Using kernel
+ */
+console.log('simulation 5')
+const sim = new Simulation5()
+const handler = sim.createTickHandler()
+app.on({
+  type: 'tick',
+  action: handler,
+})
+
+/**
+ * 2d data structure approach - surprisingly fast
  */
 // console.log('simulation 2d')
 // const sim = new Simulation2d()
@@ -76,10 +89,17 @@ const app = loop({
 
 // @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
-app.start()
+// app.start()
 
 // console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
 // console.log('Cells:', sim.world.data.length)
+
+window.addEventListener('keydown', (event) => {
+  switch (event.key) {
+    case ' ':
+      sim.step(app)
+  }
+})
 
 /**
  * Bench marks for iteration order

@@ -140,7 +140,7 @@ export function applyKernel2d(
   for (const [weight, point] of kernel) {
     const target = applyToroidalPermutedOffset(
       idx % size[0],
-      (idx / size[1]) | 0,
+      (idx / size[0]) | 0,
       point[0],
       point[1],
       size[0],
@@ -242,6 +242,6 @@ export function applyToroidalPermutedOffset(
     // eslint-disable-next-line no-nested-ternary -- wrapping
     (x < -ox ? w + ox : x >= w - ox ? ox - 1 : x + ox) +
     // eslint-disable-next-line no-nested-ternary -- wrapping
-    (y < -oy ? h + oy : y >= h - oy ? oy - 1 : y + oy) * h
+    (y < -oy ? h + oy : y >= h - oy ? oy - 1 : y + oy) * w
   )
 }
