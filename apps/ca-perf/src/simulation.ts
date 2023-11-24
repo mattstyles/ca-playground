@@ -6,7 +6,8 @@ import {RateLimiter} from '@ca/rate-limiter'
 // import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
-import {setUpdate, setRender} from './track.ts'
+import {setUpdate, setRender} from './tools/track.ts'
+import {setInitialState, size, cellSize} from './tools/init.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 
@@ -36,25 +37,25 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    // this.world = new World(1200, 600)
-    // this.world.cellsize = Point.of(3, 3)
-    this.world = new World(1200, 600)
-    this.cellSize = Point.of(3, 3)
+    // const stride = 5
+    this.world = new World(size.x, size.y)
+    this.cellSize = Point.of(cellSize.x, cellSize.y)
     this.updateFps = 20
 
     this.actions = new Set()
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
+    setInitialState('blinky', this.world)
+
     // Set initial state - blinky (more of a perf test than anything else)
-    const stride = 3
-    for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-      for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-        this.setCell(x, y - 1, 1)
-        this.setCell(x, y, 1)
-        this.setCell(x, y + 1, 1)
-      }
-    }
+    // for (let y = (stride * 0.5) | 0; y < this.world.size.y; y = y + stride) {
+    //   for (let x = (stride * 0.5) | 0; x < this.world.size.x; x = x + stride) {
+    //     this.setCell(x, y - 1, 1)
+    //     this.setCell(x, y, 1)
+    //     this.setCell(x, y + 1, 1)
+    //   }
+    // }
 
     // Set initial state - 25%-75% random
     // const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
@@ -140,7 +141,6 @@ export class Simulation implements BaseSimulation {
       //   }
       // }
 
-      // This is about 4-5ms faster
       neighbours = this.world.getNumNeighbours(idx)
 
       // Dead cell --> this is the slowdown right here
@@ -293,10 +293,4 @@ export class Simulation implements BaseSimulation {
       this.world.data[idx + this.world.size.x + 1]
     )
   }
-}
-
-function setInitialState(buffer: Uint8ClampedArray): void {
-  buffer[2 * 50 + 2] = 1
-  buffer[2 * 50 + 3] = 1
-  buffer[2 * 50 + 4] = 1
 }

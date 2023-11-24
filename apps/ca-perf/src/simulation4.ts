@@ -2,47 +2,9 @@ import type {ApplicationInstance} from 'sketch-loop'
 
 import {World} from '@ca/world'
 
-// import {Point, Rect} from 'mathutil'
-// import {Point, Rect} from './struct'
-// import {debugState} from './debug'
-import {setUpdate, setRender} from './track.ts'
-
-export class Point {
-  x: number
-  y: number
-  static of(x: number, y: number) {
-    return new Point(x, y)
-  }
-  constructor(x: number, y: number) {
-    this.x = x
-    this.y = y
-  }
-}
-
-export class Rect {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  static of(x1: number, y1: number, x2: number, y2: number) {
-    return new Rect(x1, y1, x2, y2)
-  }
-  constructor(x1: number, y1: number, x2: number, y2: number) {
-    this.x1 = x1
-    this.y1 = y1
-    this.x2 = x2
-    this.y2 = y2
-  }
-
-  contains(point: Point) {
-    return (
-      point.x >= this.x1 &&
-      point.y >= this.y1 &&
-      point.x < this.x2 &&
-      point.y < this.y2
-    )
-  }
-}
+import {Point} from 'mathutil'
+import {setUpdate, setRender} from './tools/track.ts'
+import {setInitialState, size, cellSize} from './tools/init.ts'
 
 interface TickParams {
   app: ApplicationInstance
@@ -65,45 +27,28 @@ type Action = [idx: number, flag: boolean]
 
 interface CASimulation {
   origin: Point
-  // dim: Point
   cellSize: Point
-  // board: Rect
   updateFps: number
 
   // Methods
-  getEvents(): Record<string, TickHandler>
+  getEvents: () => Record<string, TickHandler>
 }
 
 export class Simulation implements CASimulation {
   origin: Point
-  // dim: Point
   cellSize: Point
-  // board: Rect
   updateFps: number
-  // cells: Uint8Array
   actions: Set<Action>
   points: Array<Point>
   world: World
 
   constructor() {
     this.origin = new Point(0, 0)
-    // this.dim = Point.of(1200, 600)
-    this.cellSize = Point.of(3, 3)
-    // this.board = Rect.of(
-    //   this.origin.x,
-    //   this.origin.y,
-    //   this.origin.x + this.dim.x,
-    //   this.origin.y + this.dim.y,
-    // )
+
+    this.world = new World(size.x, size.y)
+    this.cellSize = Point.of(cellSize.x, cellSize.y)
     this.updateFps = 20
-
-    // const buffer = new ArrayBuffer(this.dim.x * this.dim.y)
-    // this.cells = new Uint8Array(buffer)
-
     this.actions = new Set()
-
-    // World
-    this.world = new World(1200, 600)
 
     // Cache Points for rendering
     this.points = []
@@ -113,16 +58,7 @@ export class Simulation implements CASimulation {
       }
     }
 
-    // Initial state
-    const stride = 3
-    for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-      for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-        this.toggleCell(x, y - 1, true)
-        this.toggleCell(x, y, true)
-        this.toggleCell(x, y + 1, true)
-        // num = num + 3
-      }
-    }
+    setInitialState('blinky', this.world)
   }
 
   getEvents() {
@@ -250,7 +186,7 @@ export class Simulation implements CASimulation {
     )
   }
 
-  private render({app}: TickParams) {
+  private render({app}: TickParams): void {
     const start = performance.now()
 
     const padding = 1
@@ -264,23 +200,9 @@ export class Simulation implements CASimulation {
     )
 
     app.ctx.fillStyle = '#2d3032'
-    // for (let [idx, value] of this.cells.entries()) {
-    //   if (value === 1) {
-    //     // We could pool all of the points easy enough, at a cost of memory, but save on the GC
-    //     const {x, y} = this.from1d(idx)
-    //     app.ctx.fillRect(
-    //       x * this.cellSize.x + padding,
-    //       y * this.cellSize.y + padding,
-    //       this.cellSize.x - padding,
-    //       this.cellSize.y - padding
-    //     )
-    //   }
-    // }
 
     for (let idx = 0; idx < this.world.data.length; idx++) {
       if (this.world.data[idx] === 1) {
-        // const {x, y} = this.from1d(idx)
-        // const {x, y} = this.points[idx]
         app.ctx.fillRect(
           this.points[idx].x * this.cellSize.x + padding,
           this.points[idx].y * this.cellSize.y + padding,
@@ -290,57 +212,14 @@ export class Simulation implements CASimulation {
       }
     }
 
-    // debugState.renderTime = performance.now() - start
     setRender(performance.now() - start)
   }
 
-  private update() {
+  private update(): void {
     const start = performance.now()
 
-    let neighbours = 0
-    for (const [idx, value] of this.world.data.entries()) {
-      neighbours = this.getNumNeighbours(idx)
-
-      // Rules
-      // Alive cell
-      // if (value === 1) {
-      //   if (neighbours < 2 || neighbours >= 4) {
-      //     // Kill cell
-      //     this.actions.add([idx, false])
-      //     continue
-      //   }
-      // }
-
-      // // Dead cell
-      // if (neighbours === 3) {
-      //   // Birth cell
-      //   this.actions.add([idx, true])
-      // }
-
-      /** ---------------------------------------------------- */
-      // Dead cell
-      // if (value === 0 && neighbours === 3) {
-      //   this.actions.add([idx, true])
-      //   continue
-      // }
-
-      // // Alive cell
-      // if (neighbours < 2 || neighbours > 3) {
-      //   this.actions.add([idx, false])
-      // }
-      /** ---------------------------------------------------- */
-    }
-
-    // // Process actions to update board state
-    // for (const action of this.actions) {
-    //   this.world.data[action[0]] = Number(action[1])
-    // }
-    // this.actions.clear()
-
-    // This is slower
     this.world.iterate()
 
-    // debugState.updateTime = performance.now() - start
     setUpdate(performance.now() - start)
   }
 }

@@ -1,75 +1,46 @@
-import type {TickEvent} from 'sketch-application'
+import type {TickEvent, TickHandler, TickApplication} from 'sketch-application'
 import type {ApplicationInstance} from 'sketch-loop'
 
 import {Point, wrap} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
-// import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
-import {setUpdate, setRender} from './track.ts'
+import {setUpdate, setRender} from './tools/track.ts'
+import {setInitialState, size, cellSize} from './tools/init.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
-
-interface TickParams {
-  app: ApplicationInstance
-  dt: number
-}
-type TickHandler = (params: TickParams) => void
-function rateLimiter(fps: number, cb: TickHandler): TickHandler {
-  const budget = 1000 / fps
-  let last = 0
-  return function rateLimited(params) {
-    last = last + params.dt
-    if (last > budget) {
-      cb(params)
-      last = last - budget
-    }
-  }
-}
-
 type Action = [idx: number, value: number]
 
-interface BaseSimulation {
-  origin: Point
-  cellSize: Point
-  updateFps: number
-  world: World
-
-  createTickHandler: () => TickAction
-  setCell: (x: number, y: number, value: number) => void
-  // setUps: (ups: number) => void
-}
-
-export class Simulation implements BaseSimulation {
+export class Simulation {
   origin: Point
   cellSize: Point
   updateFps: number
   world: World
 
   actions: Set<Action>
-  // rateLimiter: RateLimiter<TickAction>
+  rateLimiter: RateLimiter<TickAction>
 
   constructor() {
     this.origin = Point.of(0, 0)
-    // this.world = new World(1200, 600)
-    // this.world.cellsize = Point.of(3, 3)
-    this.world = new World(1200, 600)
-    this.cellSize = Point.of(3, 3)
+    const stride = 5
+    this.world = new World(size.x, size.y)
+    this.cellSize = Point.of(cellSize.x, cellSize.y)
     this.updateFps = 20
 
     this.actions = new Set()
-    // this.rateLimiter = new RateLimiter(this.updateFps)
-    // this.rateLimiter.register(this.update)
+    this.rateLimiter = new RateLimiter(this.updateFps)
+    this.rateLimiter.register(this.update)
+
+    setInitialState('blinky', this.world)
 
     // Set initial state - blinky (more of a perf test than anything else)
-    const stride = 3
-    for (let y = stride; y < this.world.size.y; y = y + 3 + stride) {
-      for (let x = stride; x < this.world.size.x; x = x + 3 + stride) {
-        this.setCell(x, y - 1, 1)
-        this.setCell(x, y, 1)
-        this.setCell(x, y + 1, 1)
-      }
-    }
+    // for (let y = 2; y < this.world.size.y; y = y + stride) {
+    //   for (let x = 2; x < this.world.size.x; x = x + stride) {
+    //     this.setCell(x, y - 1, 1)
+    //     this.setCell(x, y, 1)
+    //     this.setCell(x, y + 1, 1)
+    //   }
+    // }
 
     // Set initial state - 25%-75% random
     // const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
@@ -120,10 +91,6 @@ export class Simulation implements BaseSimulation {
   private update: TickAction = () => {
     // const timer = trace.getTimer('update')
     const start = performance.now()
-    // const stride = this.world.size.x
-    // const kernel = createPresetKernel(KernelPresets.Moore, {
-    //   stride: stride,
-    // })
 
     this.world.iterate()
 
@@ -139,25 +106,15 @@ export class Simulation implements BaseSimulation {
   }
 
   createTickHandler(): TickAction {
-    const fn = rateLimiter(20, this.update.bind(this))
     return (params) => {
       this.render(params)
-
-      // No difference, slow down is not caused by ratelimiter class
-      // this.rateLimiter.apply(params)
-      fn(params)
+      this.rateLimiter.apply(params)
     }
   }
 
   setCell(x: number, y: number, value: number): void {
     this.actions.add([y * this.world.size.x + x, value])
   }
-
-  // setUps(ups: number): void {
-  //   this.updateFps = ups
-  //   this.rateLimiter.setFps(ups)
-  //   // trace.set('updateFps', ups)
-  // }
 
   step(app: ApplicationInstance): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- test
@@ -261,10 +218,4 @@ export class Simulation implements BaseSimulation {
       this.world.data[idx + this.world.size.x + 1]
     )
   }
-}
-
-function setInitialState(buffer: Uint8ClampedArray): void {
-  buffer[2 * 50 + 2] = 1
-  buffer[2 * 50 + 3] = 1
-  buffer[2 * 50 + 4] = 1
 }

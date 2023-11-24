@@ -1,6 +1,7 @@
 import type {TickHandler} from 'sketch-application'
+import type {TickApplication} from 'sketch-application'
 
-export class RateLimiter<T extends TickHandler<unknown>> {
+export class RateLimiter<T extends TickHandler> {
   #budget: number
   #last: number
   #handlers: Set<T>

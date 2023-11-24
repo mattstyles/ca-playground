@@ -4,7 +4,7 @@ import type {ApplicationInstance} from 'sketch-loop'
 // import {Point, Rect} from './struct'
 // import {debugState} from './debug'
 
-import {setUpdate, setRender} from './track.ts'
+import {setUpdate, setRender} from './tools/track.ts'
 
 export class Point {
   x: number

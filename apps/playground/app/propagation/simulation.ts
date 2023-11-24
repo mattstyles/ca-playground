@@ -39,16 +39,9 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    // this.dim = Point.of(400, 200)
-    this.cellSize = Point.of(7, 7)
-    // this.frame = Rect.of(
-    //   this.origin.x,
-    //   this.origin.y,
-    //   this.origin.x + this.world.size.x,
-    //   this.origin.y + this.world.size.dim.y,
-    // )
-    this.updateFps = 20
     this.world = new World(500, 260)
+    this.cellSize = Point.of(7, 7)
+    this.updateFps = 20
 
     this.cells = new Uint8Array(this.world.size.x * this.world.size.y)
 
@@ -102,9 +95,7 @@ export class Simulation implements BaseSimulation {
   private update: TickAction = () => {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
-    const kernel = createPresetKernel(KernelPresets.Cardinal, {
-      stride: stride,
-    })
+    const kernel = createPresetKernel(KernelPresets.Cardinal)
     let value = 0
     for (let idx = 0; idx < this.world.data.length; idx++) {
       value = this.world.getCell(idx)

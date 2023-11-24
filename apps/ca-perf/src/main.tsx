@@ -89,10 +89,10 @@ app.on({
 
 // @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
-// app.start()
+app.start()
 
-// console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
-// console.log('Cells:', sim.world.data.length)
+console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
+console.log('Cells:', sim.world.data.length)
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {

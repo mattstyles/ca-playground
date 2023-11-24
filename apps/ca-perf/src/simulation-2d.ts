@@ -6,7 +6,7 @@ import {RateLimiter} from '@ca/rate-limiter'
 // import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
-import {setUpdate, setRender} from './track.ts'
+import {setUpdate, setRender} from './tools/track.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [[x: number, y: number], value: number]

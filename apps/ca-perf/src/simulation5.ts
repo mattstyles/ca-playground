@@ -1,12 +1,13 @@
 import type {TickEvent} from 'sketch-application'
 import type {ApplicationInstance} from 'sketch-loop'
 
-import {Point, wrap} from 'mathutil'
+import {Point} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
 // import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets, convolve2d} from '@ca/kernel'
-import {setUpdate, setRender} from './track.ts'
+import {setUpdate, setRender} from './tools/track.ts'
+import {setInitialState, size, cellSize} from './tools/init.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [idx: number, value: number]
@@ -33,47 +34,16 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    this.world = new World(4 * 8, 4 * 4) // @TODO non-square does not currently work with the current convolution -- probably this is something to do with the toroidal function and how 2d offsets get mapped to a 1d array
-    this.cellSize = Point.of(50, 50)
+
+    this.world = new World(size.x, size.y)
+    this.cellSize = Point.of(cellSize.x, cellSize.y)
     this.updateFps = 20
 
     this.actions = new Set()
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    // Set initial state - blinky (more of a perf test than anything else)
-    // const stride = 3
-    // for (let y = 1; y < this.world.size.y; y = y + 1 + stride) {
-    //   for (let x = 1; x < this.world.size.x; x = x + 1 + stride) {
-    //     this.setCell(x, y - 1, 1)
-    //     this.setCell(x, y, 1)
-    //     this.setCell(x, y + 1, 1)
-    //   }
-    // }
-
-    // Set initial state - 25%-75% random
-    // const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
-    // for (let i = 0; i < this.world.data.length * p; i++) {
-    //   this.setCell(
-    //     Math.floor(Math.random() * this.world.size.x),
-    //     Math.floor(Math.random() * this.world.size.y),
-    //     1,
-    //   )
-    // }
-
-    // Gliders!!
-    const stride = 5
-    const x = 3
-    const y = 3
-    // for (let y = 2; y < this.world.size.y - 2; y = y + stride) {
-    //   for (let x = 2; x < this.world.size.x - 2; x = x + stride) {
-    this.setCell(x + 1, y - 1, 1)
-    this.setCell(x, y - 2, 1)
-    this.setCell(x - 1, y, 1)
-    this.setCell(x, y, 1)
-    this.setCell(x + 1, y, 1)
-    //   }
-    // }
+    setInitialState('glider', this.world)
 
     this.#applyActions()
   }
