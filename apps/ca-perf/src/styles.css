@@ -35,3 +35,9 @@ body {
   right: 5px;
   border-radius: 3px;
 }
+
+.heading {
+  font-size: 14px;
+  line-height: 20px;
+  padding-bottom: 4px;
+}

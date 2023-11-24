@@ -7,6 +7,7 @@ import {RateLimiter} from '@ca/rate-limiter'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
 import {setUpdate, setRender} from './tools/track.ts'
+import {period, size, cellSize} from './tools/init.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [[x: number, y: number], value: number]
@@ -33,12 +34,12 @@ export class Simulation implements BaseSimulation {
 
   constructor() {
     this.origin = Point.of(0, 0)
-    this.cells = Array.from({length: 600}).map((_) => {
-      return Array.from({length: 1200}).map((__) => {
+    this.cells = Array.from({length: size.y}).map((_) => {
+      return Array.from({length: size.x}).map((__) => {
         return 0
       })
     })
-    this.cellSize = Point.of(3, 3)
+    this.cellSize = Point.of(cellSize.x, cellSize.y)
     this.updateFps = 20
 
     this.actions = new Set()
@@ -46,9 +47,9 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter.register(this.update)
 
     // Set initial state - blinky (more of a perf test than anything else)
-    const stride = 3
-    for (let y = stride; y < this.cells.length; y = y + 3 + stride) {
-      for (let x = stride; x < this.cells[0].length; x = x + 3 + stride) {
+
+    for (let y = 2; y < this.cells.length; y = y + period) {
+      for (let x = 2; x < this.cells[0].length; x = x + period) {
         this.setCell(x, y - 1, 1)
         this.setCell(x, y, 1)
         this.setCell(x, y + 1, 1)
@@ -103,9 +104,7 @@ export class Simulation implements BaseSimulation {
     const start = performance.now()
 
     const stride = this.cells[0].length
-    const kernel = createPresetKernel(KernelPresets.Moore, {
-      stride: stride,
-    })
+    const kernel = createPresetKernel(KernelPresets.Moore)
 
     let value = 0
     let neighbours = 0

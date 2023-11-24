@@ -8,6 +8,8 @@ import {Simulation as Simulation3} from './simulation3.ts'
 import {Simulation as Simulation4} from './simulation4.ts'
 import {Simulation as Simulation5} from './simulation5.ts'
 import {Simulation as Simulation2d} from './simulation-2d.ts'
+import {Simulation as SimulationK1} from './kernel/k1.ts'
+import {Simulation as SimulationK2} from './kernel/k2.ts'
 
 const app = loop({
   container: document.body,
@@ -53,17 +55,17 @@ const app = loop({
 /**
  * Raw sim with \@ca/world - uses .entries though :(
  */
-console.log('simulation 4')
-const sim = new Simulation4()
-const events = sim.getEvents()
-app.on({
-  type: 'tick',
-  action: events.render,
-})
-app.on({
-  type: 'tick',
-  action: events.update,
-})
+// console.log('simulation 4')
+// const sim = new Simulation4()
+// const events = sim.getEvents()
+// app.on({
+//   type: 'tick',
+//   action: events.render,
+// })
+// app.on({
+//   type: 'tick',
+//   action: events.update,
+// })
 
 /**
  * Using kernel
@@ -86,6 +88,30 @@ app.on({
 //   type: 'tick',
 //   action: handler,
 // })
+
+/**
+ * Kernel one
+ * Initial attempt, not optimised and deffo not fast
+ */
+// console.log('simulation kernel 1')
+// const sim = new SimulationK1()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel two
+ * Same approach, but some optimisations
+ */
+console.log('simulation kernel 2')
+const sim = new SimulationK2()
+const handler = sim.createTickHandler()
+app.on({
+  type: 'tick',
+  action: handler,
+})
 
 // @TODO benchmark using tinybench just the && and nested if change because it seems unbelievable that Chrome is doing something here.
 
