@@ -14,18 +14,11 @@ type Action = [idx: number, value: number]
 
 setHeading('Simulation K2')
 
-interface BaseSimulation {
-  origin: Point
-  cellSize: Point
-  updateFps: number
-  world: World
+/**
+ * Optimise to pass a reusable buffer to the convolution rather than recreate each tick
+ */
 
-  createTickHandler: () => TickAction
-  setCell: (x: number, y: number, value: number) => void
-  // setUps: (ups: number) => void
-}
-
-export class Simulation implements BaseSimulation {
+export class Simulation {
   origin: Point
   cellSize: Point
   updateFps: number
@@ -93,7 +86,8 @@ export class Simulation implements BaseSimulation {
       neighbours = convolve2d(
         kernel,
         idx,
-        [this.world.size.x, this.world.size.y],
+        this.world.size.x,
+        this.world.size.y,
         this.world.data,
         sum,
         buffer,
@@ -176,20 +170,33 @@ function applyToroidalPermutedOffset(
 function applyKernel2d(
   k: Kernel<KPoint>,
   idx: number,
-  s: KPoint,
+  // s: KPoint,
+  w: number,
+  h: number,
   src: ArrayLike<number>,
   buffer: Array<number>,
 ): Array<number> {
   for (let i = 0; i < k.length; i++) {
+    // Surprisingly, create these variables in here _is_ slower
+    // const [weight, point] = k[i]
+    // Ooo, created each variable like this is about the same though, at least in Chrome, and faster than the destructuring above
+    const point = k[i][1]
+    const weight = k[i][0]
+    // Creating this single variable makes no significant difference
     const target = applyToroidalPermutedOffset(
-      idx % s[0],
-      (idx / s[0]) | 0,
-      k[i][1][0],
-      k[i][1][1],
-      s[0],
-      s[1],
+      idx % w,
+      (idx / w) | 0,
+      // k[i][1][0],
+      // k[i][1][1],
+      point[0],
+      point[1],
+      // s[0],
+      // s[1],
+      w,
+      h,
     )
-    buffer[i] = src[target] * k[i][0]
+    // buffer[i] = src[target] * k[i][0]
+    buffer[i] = src[target] * weight
   }
   return buffer
 }
@@ -197,10 +204,12 @@ function applyKernel2d(
 function convolve2d<T>(
   k: Kernel<KPoint>,
   idx: number,
-  s: KPoint,
+  // s: KPoint,
+  w: number,
+  h: number,
   src: ArrayLike<number>,
   reducer: (src: Array<number>) => T,
   buffer: Array<number>,
 ): T {
-  return reducer(applyKernel2d(k, idx, s, src, buffer))
+  return reducer(applyKernel2d(k, idx, w, h, src, buffer))
 }

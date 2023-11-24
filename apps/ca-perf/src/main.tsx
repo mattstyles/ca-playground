@@ -10,6 +10,7 @@ import {Simulation as Simulation5} from './simulation5.ts'
 import {Simulation as Simulation2d} from './simulation-2d.ts'
 import {Simulation as SimulationK1} from './kernel/k1.ts'
 import {Simulation as SimulationK2} from './kernel/k2.ts'
+import {Simulation as SimulationK3} from './kernel/k3-2d.ts'
 
 const app = loop({
   container: document.body,
@@ -105,8 +106,20 @@ const app = loop({
  * Kernel two
  * Same approach, but some optimisations
  */
-console.log('simulation kernel 2')
-const sim = new SimulationK2()
+// console.log('simulation kernel 2')
+// const sim = new SimulationK2()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel two
+ * Same approach, but some optimisations
+ */
+console.log('simulation kernel 3 - 2d')
+const sim = new SimulationK3()
 const handler = sim.createTickHandler()
 app.on({
   type: 'tick',
@@ -117,8 +130,8 @@ app.on({
 
 app.start()
 
-console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
-console.log('Cells:', sim.world.data.length)
+// console.log('World size:', `[${sim.world.size.x}, ${sim.world.size.y}]`)
+// console.log('Cells:', sim.world.data.length)
 
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
