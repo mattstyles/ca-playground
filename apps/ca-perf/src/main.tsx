@@ -11,6 +11,7 @@ import {Simulation as Simulation2d} from './simulation-2d.ts'
 import {Simulation as SimulationK1} from './kernel/k1.ts'
 import {Simulation as SimulationK2} from './kernel/k2.ts'
 import {Simulation as SimulationK3} from './kernel/k3-2d.ts'
+import {Simulation as SimulationK4} from './kernel/k4.ts'
 
 const app = loop({
   container: document.body,
@@ -115,11 +116,23 @@ const app = loop({
 // })
 
 /**
- * Kernel two
- * Same approach, but some optimisations
+ * Kernel three
+ * Fully 2d approach, without translating the kernel to 1d
  */
-console.log('simulation kernel 3 - 2d')
-const sim = new SimulationK3()
+// console.log('simulation kernel 3 - 2d')
+// const sim = new SimulationK3()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel four
+ * Same 1d as kernel 2, but using a swap buffer instead of the actions mutation array
+ */
+console.log('simulation kernel 4')
+const sim = new SimulationK4()
 const handler = sim.createTickHandler()
 app.on({
   type: 'tick',
