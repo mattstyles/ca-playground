@@ -53,28 +53,28 @@ const app = loop({
 /**
  * Raw sim with \@ca/world - uses .entries though :(
  */
-// console.log('simulation 4')
-// const sim = new Simulation4()
-// const events = sim.getEvents()
-// app.on({
-//   type: 'tick',
-//   action: events.render,
-// })
-// app.on({
-//   type: 'tick',
-//   action: events.update,
-// })
+console.log('simulation 4')
+const sim = new Simulation4()
+const events = sim.getEvents()
+app.on({
+  type: 'tick',
+  action: events.render,
+})
+app.on({
+  type: 'tick',
+  action: events.update,
+})
 
 /**
  * Using kernel
  */
-console.log('simulation 5')
-const sim = new Simulation5()
-const handler = sim.createTickHandler()
-app.on({
-  type: 'tick',
-  action: handler,
-})
+// console.log('simulation 5')
+// const sim = new Simulation5()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
 
 /**
  * 2d data structure approach - surprisingly fast

@@ -46,7 +46,7 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    setInitialState('blinky', this.world)
+    setInitialState(this.world)
 
     // Set initial state - blinky (more of a perf test than anything else)
     // for (let y = (stride * 0.5) | 0; y < this.world.size.y; y = y + stride) {

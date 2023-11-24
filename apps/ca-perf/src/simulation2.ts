@@ -31,7 +31,7 @@ export class Simulation {
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    setInitialState('blinky', this.world)
+    setInitialState(this.world)
 
     // Set initial state - blinky (more of a perf test than anything else)
     // for (let y = 2; y < this.world.size.y; y = y + stride) {

@@ -43,7 +43,7 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    setInitialState('glider', this.world)
+    setInitialState(this.world)
 
     this.#applyActions()
   }

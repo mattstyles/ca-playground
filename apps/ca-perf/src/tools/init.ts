@@ -4,10 +4,14 @@ import {type World} from '@ca/world'
 export const period = 5
 export const size = Point.of(period * 160, period * 90)
 export const cellSize = Point.of(3, 3)
+export const initialSetup: InitialSetup = 'blinky'
 
 type InitialSetup = 'blinky' | 'rnd' | 'glider'
 
-export function setInitialState(state: InitialSetup, world: World): void {
+export function setInitialState(
+  world: World,
+  state: InitialSetup = initialSetup,
+): void {
   switch (state) {
     case 'blinky':
       applyBlinky(world)
@@ -16,7 +20,7 @@ export function setInitialState(state: InitialSetup, world: World): void {
       applyRandom(world)
       return
     case 'glider':
-      applyRandom(world)
+      applyGlider(world)
       return
     default:
       throw new Error('Can not identify initial state')

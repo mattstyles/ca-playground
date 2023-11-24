@@ -58,7 +58,7 @@ export class Simulation implements CASimulation {
       }
     }
 
-    setInitialState('blinky', this.world)
+    setInitialState(this.world)
   }
 
   getEvents() {
