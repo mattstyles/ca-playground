@@ -15,7 +15,8 @@
   "scripts": {
     "lint": "eslint .",
     "bench:struct": "ts-node --esm ./scripts/struct.ts",
-    "bench:kernel": "ts-node --esm ./scripts/kernel-iteration.ts"
+    "bench:kernel": "ts-node --esm ./scripts/kernel-iteration.ts",
+    "bench:convolve2d": "ts-node --esm ./scripts/convolve2d.ts"
   },
   "devDependencies": {
     "@types/node": "^20.5.2",

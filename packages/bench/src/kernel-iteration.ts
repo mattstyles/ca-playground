@@ -56,7 +56,7 @@ export class Search2d extends IterationBaseBench {
       // Gather xs
       for (let x = 0; x < this.size.x; x++) {
         // Offsets
-        for (const [ox, oy] of this.kernel) {
+        for (const [w, [ox, oy]] of this.kernel) {
           const xx =
             x < -ox ? this.size.x + ox : x >= this.size.x - ox ? ox - 1 : x + ox
           const yy =
@@ -90,7 +90,7 @@ export class Search2dOffsetFn extends IterationBaseBench {
       // Gather xs
       for (let x = 0; x < this.size.x; x++) {
         // Offsets
-        for (const [ox, oy] of this.kernel) {
+        for (const [w, [ox, oy]] of this.kernel) {
           const [xx, yy] = applyOffset(x, y, ox, oy, this.size.x, this.size.y)
 
           // Bit flop 0...1
@@ -125,7 +125,7 @@ export class Search2dConvert extends IterationBaseBench {
     for (let i = 0; i < this.data.length; i++) {
       const x = i % this.size.x
       const y = (i / this.size.x) | 0
-      for (const [ox, oy] of this.kernel) {
+      for (const [w, [ox, oy]] of this.kernel) {
         const [xx, yy] = applyOffset(x, y, ox, oy, this.size.x, this.size.y)
         this.data[this.to1d(xx, yy)] ^= 1
       }
@@ -166,7 +166,7 @@ export class Search2dLookup extends IterationBaseBench {
     for (let i = 0; i < this.data.length; i++) {
       const x = this.lookup[i * 2]
       const y = this.lookup[i * 2 + 1]
-      for (const [ox, oy] of this.kernel) {
+      for (const [w, [ox, oy]] of this.kernel) {
         const [xx, yy] = applyOffset(x, y, ox, oy, this.size.x, this.size.y)
         this.data[this.to1d(xx, yy)] ^= 1
       }
@@ -196,7 +196,7 @@ export class Search2dNoWrap extends IterationBaseBench {
   run = (): void => {
     for (let y = 1; y < this.size.y - 1; y++) {
       for (let x = 1; x < this.size.x - 1; x++) {
-        for (const [ox, oy] of this.kernel) {
+        for (const [w, [ox, oy]] of this.kernel) {
           // Bit flop 0...1
           this.data[this.to1d(x + ox, y + oy)] ^= 1
         }
