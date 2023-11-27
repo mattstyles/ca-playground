@@ -14,6 +14,7 @@ import {Simulation as SimulationK3} from './kernel/k3-2d.ts'
 import {Simulation as SimulationK4} from './kernel/k4.ts'
 import {Simulation as SimulationK5} from './kernel/k5.ts'
 import {Simulation as SimulationK6} from './kernel/k6.ts'
+import {Simulation as SimulationK7} from './kernel/k7.ts'
 
 const app = loop({
   container: document.body,
@@ -157,8 +158,20 @@ const app = loop({
  * Kernel six
  * Same as 5 but removed the weighted calculations. All neighbours are assumed to have a weight of 1 and the origin location is omitted. This results in less operations as the kernel is of size 8 and not 9 (with a redundant 0 value origin),
  */
-console.log('simulation kernel 6')
-const sim = new SimulationK6()
+// console.log('simulation kernel 6')
+// const sim = new SimulationK6()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel six
+ * Same as 5 but removed the weighted calculations. All neighbours are assumed to have a weight of 1 and the origin location is omitted. This results in less operations as the kernel is of size 8 and not 9 (with a redundant 0 value origin),
+ */
+console.log('simulation kernel 7')
+const sim = new SimulationK7()
 const handler = sim.createTickHandler()
 app.on({
   type: 'tick',

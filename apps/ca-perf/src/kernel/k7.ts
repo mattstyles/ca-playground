@@ -12,7 +12,7 @@ import {setInitialState, size, cellSize} from '../tools/init.ts'
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [idx: number, value: number]
 
-setHeading('Simulation K6')
+setHeading('Simulation K7')
 
 /**
  * Optimise to pass a reusable buffer to the convolution rather than recreate each tick
@@ -148,14 +148,6 @@ export class Simulation {
   }
 }
 
-function sum(src: Array<number>): number {
-  let total = 0
-  for (const cell of src) {
-    total = total + cell
-  }
-  return total
-}
-
 type Kernel<T> = Array<[number, T]>
 type KPoint = [x: number, y: number]
 
@@ -171,62 +163,6 @@ const kernel: Kernel<KPoint> = [
   [1, [1, 1]],
 ]
 
-function applyToroidalPermutedOffset(
-  x: number,
-  y: number,
-  ox: number,
-  oy: number,
-  w: number,
-  h: number,
-): number {
-  return (
-    // eslint-disable-next-line no-nested-ternary -- wrapping
-    (x < -ox ? w + ox : x >= w - ox ? ox - 1 : x + ox) +
-    // eslint-disable-next-line no-nested-ternary -- wrapping
-    (y < -oy ? h + oy : y >= h - oy ? oy - 1 : y + oy) * w
-  )
-}
-
-function applyKernel2d(
-  k: Kernel<KPoint>,
-  idx: number,
-  w: number,
-  h: number,
-  src: ArrayLike<number>,
-): number {
-  // Moving this to an external variable to avoid having to recreate it for each convolution is slower (this _might_ have something to do with memory access, I do not know)
-  let total = 0
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of -- for loop is fine, potentially it is actually faster
-  for (let i = 0; i < k.length; i++) {
-    const point = k[i][1]
-    const target = applyToroidalPermutedOffset(
-      idx % w,
-      (idx / w) | 0,
-      point[0],
-      point[1],
-      w,
-      h,
-    )
-    total = src[target] + total
-  }
-  return total
-
-  // This offers no speed up, in fact, it seems _slightly_ slower
-  // for (const c of k) {
-  //   const point = c[1]
-  //   const target = applyToroidalPermutedOffset(
-  //     idx % w,
-  //     (idx / w) | 0,
-  //     point[0],
-  //     point[1],
-  //     w,
-  //     h,
-  //   )
-  //   total = src[target] + total
-  // }
-  // return total
-}
-
 function convolve2d(
   k: Kernel<KPoint>,
   idx: number,
@@ -234,5 +170,30 @@ function convolve2d(
   h: number,
   src: ArrayLike<number>,
 ): number {
-  return applyKernel2d(k, idx, w, h, src)
+  let total = 0
+
+  // we can cache these per idx value out here
+  const x = idx % w
+  const y = (idx / w) | 0
+
+  // eslint-disable-next-line @typescript-eslint/prefer-for-of -- for loop is faster
+  for (let i = 0; i < k.length; i++) {
+    const point = k[i][1]
+    const target =
+      // eslint-disable-next-line no-nested-ternary -- wrapping
+      (x < -point[0]
+        ? w + point[0]
+        : x >= w - point[0]
+        ? point[0] - 1
+        : x + point[0]) +
+      // eslint-disable-next-line no-nested-ternary -- wrapping
+      (y < -point[1]
+        ? h + point[1]
+        : y >= h - point[1]
+        ? point[1] - 1
+        : y + point[1]) *
+        w
+    total = src[target] + total
+  }
+  return total
 }
