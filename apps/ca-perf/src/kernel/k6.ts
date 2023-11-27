@@ -159,7 +159,18 @@ function sum(src: Array<number>): number {
 type Kernel<T> = Array<[number, T]>
 type KPoint = [x: number, y: number]
 
-const kernel = createPresetKernel(KernelPresets.Moore) as Kernel<KPoint>
+const kernel: Kernel<KPoint> = [
+  [1, [-1, -1]],
+  [1, [0, -1]],
+  [1, [1, -1]],
+  [1, [-1, 0]],
+  // [0, [0, 0]],
+  [1, [1, 0]],
+  [1, [-1, 1]],
+  [1, [0, 1]],
+  [1, [1, 1]],
+]
+
 function applyToroidalPermutedOffset(
   x: number,
   y: number,
@@ -187,7 +198,6 @@ function applyKernel2d(
   // eslint-disable-next-line @typescript-eslint/prefer-for-of -- for loop is fine
   for (let i = 0; i < k.length; i++) {
     const point = k[i][1]
-    const weight = k[i][0]
     const target = applyToroidalPermutedOffset(
       idx % w,
       (idx / w) | 0,
@@ -196,7 +206,7 @@ function applyKernel2d(
       w,
       h,
     )
-    total = src[target] * weight + total
+    total = src[target] + total
   }
   return total
 }

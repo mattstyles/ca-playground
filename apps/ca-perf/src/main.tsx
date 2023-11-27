@@ -13,6 +13,7 @@ import {Simulation as SimulationK2} from './kernel/k2.ts'
 import {Simulation as SimulationK3} from './kernel/k3-2d.ts'
 import {Simulation as SimulationK4} from './kernel/k4.ts'
 import {Simulation as SimulationK5} from './kernel/k5.ts'
+import {Simulation as SimulationK6} from './kernel/k6.ts'
 
 const app = loop({
   container: document.body,
@@ -144,8 +145,20 @@ const app = loop({
  * Kernel five
  * Same as 4 but does summation inline i.e. the convolution handles a running total and does not create/use a buffer of values and then a reducer over that array, instead doing the summation along with the weighted calculations and returning a number only.
  */
-console.log('simulation kernel 5')
-const sim = new SimulationK5()
+// console.log('simulation kernel 5')
+// const sim = new SimulationK5()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel six
+ * Same as 5 but removed the weighted calculations. All neighbours are assumed to have a weight of 1 and the origin location is omitted. This results in less operations as the kernel is of size 8 and not 9 (with a redundant 0 value origin),
+ */
+console.log('simulation kernel 6')
+const sim = new SimulationK6()
 const handler = sim.createTickHandler()
 app.on({
   type: 'tick',
