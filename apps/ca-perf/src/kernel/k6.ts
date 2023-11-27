@@ -12,7 +12,7 @@ import {setInitialState, size, cellSize} from '../tools/init.ts'
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [idx: number, value: number]
 
-setHeading('Simulation K5')
+setHeading('Simulation K6')
 
 /**
  * Optimise to pass a reusable buffer to the convolution rather than recreate each tick
