@@ -3,7 +3,7 @@ import {Bench} from 'tinybench'
 import {createConvolutionSuite} from '../src/convolve2d.ts'
 
 const size = [500, 500]
-const bench = new Bench({time: 2000})
+const bench = new Bench({time: 1000})
 
 const marks = createConvolutionSuite(size[0], size[1])
 marks.forEach((mark) => {
