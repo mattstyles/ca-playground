@@ -5,8 +5,9 @@ export const period = 5
 // export const size = Point.of(period * 16, period * 9)
 // export const cellSize = Point.of(30, 30)
 export const size = Point.of(period * 160, period * 90)
-export const cellSize = Point.of(3, 3)
+export const cellSize = Point.of(4, 4)
 export const initialSetup: InitialSetup = 'blinky'
+export const ups = 20
 
 type InitialSetup = 'blinky' | 'rnd' | 'glider'
 

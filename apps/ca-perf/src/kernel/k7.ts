@@ -7,7 +7,13 @@ import {RateLimiter} from '@ca/rate-limiter'
 import {World} from '@ca/world'
 import {createPresetKernel, KernelPresets} from '@ca/kernel'
 import {setUpdate, setRender, setHeading} from '../tools/track.ts'
-import {setInitialState, size, cellSize} from '../tools/init.ts'
+import {
+  setInitialState,
+  size,
+  cellSize,
+  initialSetup,
+  ups,
+} from '../tools/init.ts'
 
 type TickAction = TickEvent<ApplicationInstance>['action']
 type Action = [idx: number, value: number]
@@ -32,14 +38,14 @@ export class Simulation {
 
     this.world = new World(size.x, size.y)
     this.cellSize = Point.of(cellSize.x, cellSize.y)
-    this.updateFps = 20
+    this.updateFps = ups
 
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
     this.swap = new Uint8Array(size.x * size.y)
 
-    setInitialState(this.world, 'blinky')
+    setInitialState(this.world, initialSetup)
 
     // Fill swap buffer with initial state
     for (const i in this.world.data) {
