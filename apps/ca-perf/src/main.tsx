@@ -12,6 +12,7 @@ import {Simulation as SimulationK1} from './kernel/k1.ts'
 import {Simulation as SimulationK2} from './kernel/k2.ts'
 import {Simulation as SimulationK3} from './kernel/k3-2d.ts'
 import {Simulation as SimulationK4} from './kernel/k4.ts'
+import {Simulation as SimulationK5} from './kernel/k5.ts'
 
 const app = loop({
   container: document.body,
@@ -131,8 +132,20 @@ const app = loop({
  * Kernel four
  * Same 1d as kernel 2, but using a swap buffer instead of the actions mutation array
  */
-console.log('simulation kernel 4')
-const sim = new SimulationK4()
+// console.log('simulation kernel 4')
+// const sim = new SimulationK4()
+// const handler = sim.createTickHandler()
+// app.on({
+//   type: 'tick',
+//   action: handler,
+// })
+
+/**
+ * Kernel five
+ * Same as 4 but does summation inline i.e. the convolution handles a running total and does not create/use a buffer of values and then a reducer over that array, instead doing the summation along with the weighted calculations and returning a number only.
+ */
+console.log('simulation kernel 5')
+const sim = new SimulationK5()
 const handler = sim.createTickHandler()
 app.on({
   type: 'tick',

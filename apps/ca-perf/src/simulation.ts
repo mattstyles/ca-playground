@@ -198,7 +198,7 @@ export class Simulation implements BaseSimulation {
     this.render({app: app, dt: 0})
   }
 
-  // Non-toroidal (i.e. no wrapping)
+  // Non-toroidal (i.e. no wrapping) - the toroidal case is extremely comparable to non-toroidal
   // For speed we're going to avoid allocate and do things manually
   private getNumNeighbours(idx: number): number {
     // Top-left corner
