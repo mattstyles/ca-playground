@@ -252,36 +252,36 @@ export function createConvolutionSuite(
 }
 
 // Testing manual benches
-const d = Array.from({length: 3 * 3}).map((_) => 0)
-d[8] = 1
-const out = []
-const out2 = []
-for (let i = 0; i < d.length; i++) {
-  out.push(mooreNTConvolve(i, 3, d))
-  out2.push(mooreConvolve(i, 3, d, 9))
-}
-console.log('Testing manual convolution')
-// console.log(out)
-// console.log(out2)
-console.log('source array')
-render(d, 3)
-console.log('non-toroidal')
-render(out, 3)
-console.log('toroidal')
-render(out2, 3)
+// const d = Array.from({length: 3 * 3}).map((_) => 0)
+// d[8] = 1
+// const out = []
+// const out2 = []
+// for (let i = 0; i < d.length; i++) {
+//   out.push(mooreNTConvolve(i, 3, d))
+//   out2.push(mooreConvolve(i, 3, d, 9))
+// }
+// console.log('Testing manual convolution')
+// // console.log(out)
+// // console.log(out2)
+// console.log('source array')
+// render(d, 3)
+// console.log('non-toroidal')
+// render(out, 3)
+// console.log('toroidal')
+// render(out2, 3)
 
-function render(arr: Array<number>, w: number) {
-  let row: Array<number> = []
-  for (let i = 0; i < arr.length; i++) {
-    row.push(arr[i])
-    if ((i + 1) % w === 0) {
-      const o = []
-      for (const v of row) {
-        o.push(v)
-      }
-      console.log(o.join(', '))
-      row = []
-    }
-  }
-  console.log('')
-}
+// function render(arr: Array<number>, w: number) {
+//   let row: Array<number> = []
+//   for (let i = 0; i < arr.length; i++) {
+//     row.push(arr[i])
+//     if ((i + 1) % w === 0) {
+//       const o = []
+//       for (const v of row) {
+//         o.push(v)
+//       }
+//       console.log(o.join(', '))
+//       row = []
+//     }
+//   }
+//   console.log('')
+// }
