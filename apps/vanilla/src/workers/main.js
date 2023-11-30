@@ -79,10 +79,11 @@ const w = period * 200 // 800
 const h = period * 200 // 450
 const cellSizeX = 3
 const cellSizeY = 3
-const ups = 1000
+const ups = 20
+// const ups = 1000
 // This requires hacking hench to serve the relevant headers
-const buffer = new SharedArrayBuffer(w * h)
-// const buffer = new ArrayBuffer(w * h)
+// const buffer = new SharedArrayBuffer(w * h)
+const buffer = new ArrayBuffer(w * h)
 let data = new Uint8Array(buffer)
 const actions = new Set()
 
@@ -173,6 +174,7 @@ console.log(disjoint)
 // const pool = new ThreadPool(navigator.hardwareConcurrency)
 const pool = new ThreadPool(disjoint.length)
 
+let lastUpdate = performance.now()
 async function update() {
   let start = performance.now()
 
@@ -187,8 +189,14 @@ async function update() {
     apply(mut)
   }
 
-  setTimeout(update, 1000 / ups)
-  setUpdate(performance.now() - start)
+  // This little logic is far from perfect, it will attempt to go as fast as possible to get to the target ups, i.e. if it miss a ups target then it'll queue another update for the next tick instead of waiting. Try setting the ups to 1 and see it double up to try and make the next frame interval, so its pretty rubbish.
+  const now = performance.now()
+  const delta = now - lastUpdate
+  const delay = delta > 1000 / ups ? 1 : 1000 / ups - delta
+  lastUpdate = now
+
+  setTimeout(update, delay)
+  setUpdate(now - start)
 }
 
 function apply(set) {
