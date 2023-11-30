@@ -26,10 +26,12 @@ canvas.style.display = 'block'
 setHeading('Vanilla convolution test')
 
 const period = 5
-const w = period * 160
-const h = period * 90
-const cellSizeX = 4
-const cellSizeY = 4
+// const w = period * 160
+// const h = period * 90
+const w = period * 180
+const h = period * 120
+const cellSizeX = 3
+const cellSizeY = 3
 const ups = 20
 let data = new Uint8Array(w * h)
 const actions = new Set()
@@ -110,15 +112,14 @@ function update() {
   window.requestAnimationFrame(update)
 }
 
-function apply(set) {
-  // for (let action of set) {
-  //   data[action[0]] = action[1]
-  // }
-  // set.clear()
+// function apply(set) {
+//   for (let action of set) {
+//     data[action[0]] = action[1]
+//   }
+//   set.clear()
 
-  // let swap = new Uint8Array(w * h)
-  data = Uint8Array.from(swap)
-}
+//   // data = Uint8Array.from(swap)
+// }
 
 window.requestAnimationFrame(render)
 window.requestAnimationFrame(update)
