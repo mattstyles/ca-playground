@@ -38,9 +38,8 @@ class Thread {
       this.resolve = res
       // this.worker.addEventListener('message', this.onComplete)
 
-      // @TODO transferable data buffer
-      const msg = {data, w, h, x1, y1, x2, y2, id: 123}
-      this.worker.postMessage(data.buffer)
+      const msg = {buffer: data.buffer, w, h, x1, y1, x2, y2, id: 123}
+      this.worker.postMessage(msg)
     })
   }
 }
@@ -73,20 +72,21 @@ canvas.style.width = window.innerWidth + 'px'
 canvas.style.height = window.innerHeight + 'px'
 canvas.style.display = 'block'
 
-setHeading('Parallel convolution test')
-
 const period = 5
 // const w = period * 160 // 800
 // const h = period * 90 // 450
-const w = period * 60 // 800
-const h = period * 60 // 450
+const w = period * 200 // 800
+const h = period * 200 // 450
 const cellSizeX = 3
 const cellSizeY = 3
-const ups = 20
+const ups = 1000
 // This requires hacking hench to serve the relevant headers
 const buffer = new SharedArrayBuffer(w * h)
+// const buffer = new ArrayBuffer(w * h)
 let data = new Uint8Array(buffer)
 const actions = new Set()
+
+setHeading(`Parallel convolution test ${w * h}`)
 
 function applyBlinky() {
   for (let y = 2; y < h; y = y + period) {
@@ -97,9 +97,8 @@ function applyBlinky() {
     }
   }
 }
-// applyBlinky()
 
-function applyGlider(World) {
+function applyGlider() {
   for (let y = 2; y < h - 2; y = y + period) {
     for (let x = 2; x < w - 2; x = x + period) {
       data[(y - 1) * w + x + 1] = 1
@@ -110,7 +109,17 @@ function applyGlider(World) {
     }
   }
 }
-applyGlider()
+
+function applyRandom() {
+  const p = 0.25 + Math.random() * 0.5 // 0.25...0.75
+  for (let i = 0; i < data.length * p; i++) {
+    data[Math.floor(Math.random() * w) + Math.floor(Math.random() * h) * w] = 1
+  }
+}
+
+// applyBlinky()
+// applyGlider()
+applyRandom()
 
 function render() {
   const start = performance.now()
@@ -119,7 +128,7 @@ function render() {
   ctx.fillRect(0, 0, w * cellSizeX, h * cellSizeY)
 
   const padding = 1
-  // for (let idx = 0; idx < data.length / 8; idx++) {
+  // for (let idx = 0; idx < data.length; idx++) {
   //   if (data[idx] === 1) {
   //     ctx.fillStyle = '#2d3032'
   //     ctx.fillRect(
@@ -136,8 +145,8 @@ function render() {
       if (data[idx] === 1) {
         ctx.fillStyle = '#2d3032'
         ctx.fillRect(
-          (idx % w) * cellSizeX + padding,
-          Math.floor(idx / w) * cellSizeY + padding,
+          x * cellSizeX + padding,
+          y * cellSizeY + padding,
           cellSizeX - padding,
           cellSizeY - padding,
         )
@@ -150,7 +159,7 @@ function render() {
 }
 
 const disjoint = []
-const divisions = 3
+const divisions = 4
 const wx = w / divisions
 const hy = h / divisions
 for (let y = 0; y < divisions; y++) {
@@ -167,14 +176,6 @@ const pool = new ThreadPool(disjoint.length)
 async function update() {
   let start = performance.now()
 
-  // const mutations = await Promise.all([
-  //   // work(worker, 0, 0, w / 2, h / 2),
-  //   // work(worker2, w / 2 + 1, 0, w, h / 2 + 1),
-  //   // work(worker3, 0, h / 2 + 1, w / 2 + 1, h),
-  //   // work(worker4, w / 2 + 1, h / 2 + 1, w, h),
-  //   // pool.task(0, 0, 300, 200),
-  //   // pool.task(300, 0, 600, 200),
-  // ])
   const mutations = await Promise.all(
     disjoint.map((bounds) => {
       return pool.task(bounds[0], bounds[1], bounds[2], bounds[3])

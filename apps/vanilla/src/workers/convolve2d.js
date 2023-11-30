@@ -1,45 +1,48 @@
+let actions = new Set()
+
 onmessage = (e) => {
-  // const {data, w, h, x1, y1, x2, y2, id} = e.data
-  const data = new Uint8Array(e.data)
+  const {w, h, x1, y1, x2, y2, id} = e.data
+  const data = new Uint8Array(e.data.buffer)
 
-  const actions = new Set()
-  // for (let y = y1; y < y2; y++) {
-  //   for (let x = x1; x < x2; x++) {
-  //     const idx = x + y * w
-  //     const value = data[idx]
-  //     const n = convolve2d(idx, kernel, w, h, data)
-  //     if (value === 0) {
-  //       if (n === 3) {
-  //         actions.add([idx, 1])
-  //       }
-  //       continue
-  //     }
-
-  //     // Dead cell
-  //     if (n < 2 || n > 3) {
-  //       actions.add([idx, 0])
-  //     }
-  //   }
-  // }
-
-  for (let idx = 0; idx < data.length; idx++) {
-    const value = data[idx]
-    const n = convolve2d(idx, kernel, 300, 300, data)
-    if (value === 0) {
-      if (n === 3) {
-        actions.add([idx, 1])
+  // const actions = new Set()
+  for (let y = y1; y < y2; y++) {
+    for (let x = x1; x < x2; x++) {
+      const idx = x + y * w
+      const value = data[idx]
+      const n = convolve2d(idx, kernel, w, h, data)
+      if (value === 0) {
+        if (n === 3) {
+          actions.add([idx, 1])
+        }
+        continue
       }
-      continue
-    }
 
-    // Dead cell
-    if (n < 2 || n > 3) {
-      actions.add([idx, 0])
+      // Dead cell
+      if (n < 2 || n > 3) {
+        actions.add([idx, 0])
+      }
     }
   }
 
+  // for (let idx = 0; idx < data.length; idx++) {
+  //   const value = data[idx]
+  //   const n = convolve2d(idx, kernel, 300, 300, data)
+  //   if (value === 0) {
+  //     if (n === 3) {
+  //       actions.add([idx, 1])
+  //     }
+  //     continue
+  //   }
+
+  //   // Dead cell
+  //   if (n < 2 || n > 3) {
+  //     actions.add([idx, 0])
+  //   }
+  // }
+
   // postMessage({id, actions})
   postMessage(actions)
+  actions.clear()
 }
 
 const kernel = [

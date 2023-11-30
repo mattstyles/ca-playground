@@ -28,8 +28,8 @@ setHeading('Vanilla convolution test')
 const period = 5
 // const w = period * 160
 // const h = period * 90
-const w = period * 180
-const h = period * 120
+const w = period * 400
+const h = period * 400
 const cellSizeX = 3
 const cellSizeY = 3
 const ups = 20
