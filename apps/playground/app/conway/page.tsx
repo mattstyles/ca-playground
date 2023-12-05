@@ -2,7 +2,8 @@
 
 import {useState} from 'react'
 import type {InteractionAction} from 'sketch-react-loop'
-import {SketchLoop} from 'sketch-react-loop'
+import {SketchLoop, type TickHandler} from 'sketch-react-loop'
+import {CtxApplication} from 'sketch-application'
 import {Screen} from 'ui'
 import {Simulation, trace} from './simulation'
 import {TraceProvider, Tron} from '@ca/trace'
@@ -28,9 +29,6 @@ export default function Page(): JSX.Element {
       <TraceProvider value={trace}>
         <SketchLoop
           onTick={sim.createTickHandler()}
-          // onTick={() => {
-          //   // use step for now
-          // }}
           onInteraction={({
             type,
             point,

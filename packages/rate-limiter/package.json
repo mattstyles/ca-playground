@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "sketch-application": "^0.5.1",
-    "sketch-loop": "^0.5.1"
+    "sketch-loop": "^0.5.2",
+    "sketch-react-loop": "^0.6.1"
   }
 }

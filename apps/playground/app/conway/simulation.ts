@@ -1,4 +1,6 @@
-import type {TickAction} from 'sketch-react-loop'
+// import type {Application} from 'sketch-react-loop'
+import type {ApplicationInstance, TickEvent} from 'sketch-loop'
+import type {CtxApplication, TickHandler} from 'sketch-application'
 import type {BaseWorld} from '@ca/world'
 
 import {Point, wrap} from 'mathutil'
@@ -17,7 +19,7 @@ interface BaseSimulation {
   updateFps: number
   world: World
 
-  createTickHandler: () => TickAction
+  createTickHandler: () => TickHandler<ApplicationInstance>
   setCell: (x: number, y: number, value: number) => void
   setUps: (ups: number) => void
 }
@@ -29,7 +31,7 @@ export class Simulation implements BaseSimulation {
   world: World
 
   actions: Set<Action>
-  rateLimiter: RateLimiter<TickAction>
+  rateLimiter: RateLimiter<TickHandler<ApplicationInstance>>
 
   constructor() {
     this.origin = Point.of(0, 0)
@@ -49,7 +51,7 @@ export class Simulation implements BaseSimulation {
     trace.set('Cells', this.world.data.length)
   }
 
-  private render: TickAction = ({app}) => {
+  private render: TickHandler<ApplicationInstance> = ({app}) => {
     const timer = trace.getTimer('render')
 
     app.ctx.fillStyle = '#f6f6f8'
@@ -90,7 +92,7 @@ export class Simulation implements BaseSimulation {
     timer.track()
   }
 
-  private update: TickAction = () => {
+  private update: TickHandler<ApplicationInstance> = () => {
     const timer = trace.getTimer('update')
     const stride = this.world.size.x
     const kernel = createPresetKernel(KernelPresets.Moore)
@@ -145,7 +147,7 @@ export class Simulation implements BaseSimulation {
     this.actions.clear()
   }
 
-  createTickHandler(): TickAction {
+  createTickHandler(): TickHandler<ApplicationInstance> {
     return (params) => {
       this.render(params)
       this.rateLimiter.apply(params)

@@ -1,7 +1,8 @@
-import type {TickHandler} from 'sketch-application'
-import type {TickApplication} from 'sketch-application'
+import type {TickApplication, CtxApplication} from 'sketch-application'
+import type {TickHandler} from 'sketch-loop'
+import type {ApplicationInstance} from 'sketch-loop'
 
-export class RateLimiter<T extends TickHandler> {
+export class RateLimiter<T extends TickHandler<ApplicationInstance>> {
   #budget: number
   #last: number
   #handlers: Set<T>
