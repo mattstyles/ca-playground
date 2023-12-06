@@ -145,18 +145,26 @@ export function convolveGol(
 ): number {
   let total = 0
 
+  const x = idx % size[0]
+  const y = (idx / size[0]) | 0
+
   for (const point of kernelGol) {
     total =
       total +
       src[
-        applyToroidalPermutedOffset(
-          idx % size[0],
-          (idx / size[0]) | 0,
-          point[0],
-          point[1],
-          size[0],
-          size[1],
-        )
+        // eslint-disable-next-line no-nested-ternary -- wrapping
+        (x < -point[0]
+          ? size[0] + point[0]
+          : x >= size[0] - point[0]
+          ? point[0] - 1
+          : x + point[0]) +
+          // eslint-disable-next-line no-nested-ternary -- wrapping
+          (y < -point[1]
+            ? size[1] + point[1]
+            : y >= size[1] - point[1]
+            ? point[1] - 1
+            : y + point[1]) *
+            size[0]
       ]
   }
 

@@ -7,7 +7,12 @@ import {Point} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
 import {World} from '@ca/world'
-import {createPresetKernel, KernelPresets} from '@ca/kernel'
+import {
+  type Kernel2d,
+  createPresetKernel,
+  KernelPresets,
+  convolveGol,
+} from '@ca/kernel'
 
 export const trace = new Trace()
 
@@ -94,8 +99,6 @@ export class Simulation implements BaseSimulation {
 
   private update: TickHandler<ApplicationInstance> = () => {
     const timer = trace.getTimer('update')
-    const stride = this.world.size.x
-    const kernel = createPresetKernel(KernelPresets.Moore)
 
     let value = 0
     let neighbours = 0
@@ -103,22 +106,12 @@ export class Simulation implements BaseSimulation {
     // @TODO won't handle edges
     for (let idx = 0; idx < this.world.data.length; idx++) {
       value = this.world.getCell(idx)
-      // neighbours = 0
-
-      // Iterate over the kernel
-      // for (const im of kernel) {
-      //   // Ignore central cell from kernel
-      //   if (im === 0) {
-      //     continue
-      //   }
-
-      //   if (this.world.getCell(idx + im) > 0) {
-      //     neighbours = neighbours + 1
-      //   }
-      // }
 
       // This is about 4-5ms faster
-      neighbours = this.world.getNumNeighbours(idx)
+      // neighbours = this.world.getNumNeighbours(idx)
+
+      // This is so much slower...
+      neighbours = convolveGol(idx, this.world.size.pos, this.world.data)
 
       // Starvation and competition
       if (value === 1) {
