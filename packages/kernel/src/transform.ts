@@ -1,8 +1,8 @@
 /**
- *
+ * Offset application functions
  */
 
-import type {Point} from './types.ts'
+import type {Point} from '@ca/struct'
 
 /**
  * Calculates a given offset from an origin coordinate in 2d space.

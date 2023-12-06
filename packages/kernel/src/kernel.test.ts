@@ -1,20 +1,17 @@
 import {test, expect} from 'vitest'
 
+import {type Point} from '@ca/struct'
 import {
   KernelPresets,
-  type Point,
-  type Kernel,
+  type Kernel2d,
   createPresetKernel,
-  createKernel1d,
   createKernel2d,
   presets,
   applyToroidalPermutedOffset,
   applyToroidalOffset,
-  translateKernel,
-  applyKernel,
   applyKernel2d,
   convolve2d,
-} from './kernel.ts'
+} from './index.ts'
 
 test('Create preset kernel', () => {
   const mooreOffsets = presets[KernelPresets.Moore]
@@ -31,22 +28,11 @@ test('Create preset kernel', () => {
 })
 
 test('Create 2d kernel', () => {
-  const kernel: Kernel<Point> = createKernel2d(3, 1, [1, 1, 0.5])
+  const kernel: Kernel2d = createKernel2d(3, 1, [1, 1, 0.5])
   expect(kernel).toContainEqual([1, [-1, 0]])
   expect(kernel).toContainEqual([1, [0, 0]])
   expect(kernel).toContainEqual([0.5, [1, 0]])
   expect(kernel.length).toBe(3)
-})
-
-test('Create 1d kernel', () => {
-  const offsets: Kernel<Point> = [
-    [1, [1, 1]],
-    [1, [0, -1]],
-  ]
-  const kernel = createKernel1d(offsets, 9)
-  expect(kernel).toContainEqual([1, 10])
-  expect(kernel).toContainEqual([1, -9])
-  expect(kernel.length).toBe(2)
 })
 
 test('Apply toroidal offset', () => {
@@ -182,25 +168,6 @@ test('Apply permuted toroidal offset', () => {
   }
 })
 
-test('Translate kernel to world space indices', () => {
-  const size: Point = [5, 5]
-  const kernel = presets[KernelPresets.Moore]
-
-  expect(translateKernel(kernel, 6, size)).toStrictEqual(
-    Array.from([
-      [1, 0],
-      [1, 1],
-      [1, 2],
-      [1, 5],
-      [0, 6],
-      [1, 7],
-      [1, 10],
-      [1, 11],
-      [1, 12],
-    ]),
-  )
-})
-
 test('Apply 2d kernel to world space indices', () => {
   const src = [
     [0, 0, 0, 0, 0],
@@ -215,22 +182,6 @@ test('Apply 2d kernel to world space indices', () => {
   expect(applyKernel2d(kernel, 6, size, src)).toStrictEqual(
     Array.from([0, 0, 0, 1, 0, 0, 0, 0, 3]),
   )
-})
-
-test('Translate and apply kernel', () => {
-  const src = [
-    [0, 1, 0, 0, 0],
-    [1, 0, 3, 0, 0],
-    [0, 2, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [1, 2, 0, 0, 0],
-  ].flat()
-  const size: Point = [5, 5]
-  const kernel = presets[KernelPresets.Moore]
-
-  // idx = 6 [1, 1]
-  const t = translateKernel(kernel, 6, size)
-  expect(applyKernel(t, src)).toStrictEqual([0, 1, 0, 1, 0, 3, 0, 2, 0])
 })
 
 test('Convolution over 2d search space', () => {

@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@ca/fn": "workspace:*",
+    "@ca/struct": "workspace:*",
     "mathutil": "^5.1.0"
   }
 }

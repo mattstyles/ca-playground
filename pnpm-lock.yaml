@@ -234,6 +234,9 @@ importers:
       '@ca/fn':
         specifier: workspace:*
         version: link:../fn
+      '@ca/struct':
+        specifier: workspace:*
+        version: link:../struct
       mathutil:
         specifier: ^5.1.0
         version: 5.1.0
