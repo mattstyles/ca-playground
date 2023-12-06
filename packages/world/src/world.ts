@@ -22,7 +22,7 @@ export class World implements BaseWorld {
   constructor(x: number, y: number) {
     this.size = Point.of(x, y)
     // this.data = new Uint8ClampedArray(x * y)
-    const buffer = new ArrayBuffer(x * y)
+    // const buffer = new ArrayBuffer(x * y)
     this.data = new Uint8Array(x * y)
     this.actions = new Set()
   }

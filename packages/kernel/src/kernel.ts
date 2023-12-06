@@ -1,7 +1,7 @@
 export type Point = [x: number, y: number]
 
 /**
- * The kernel refers describes a weighting function.
+ * The kernel describes a weighting function.
  * In our case this describes the weight for a given offset.
  * We can then apply those offsets to generate indices into our source data and apply weights to handle the convolution.
  */

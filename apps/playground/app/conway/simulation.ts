@@ -1,9 +1,9 @@
 // import type {Application} from 'sketch-react-loop'
-import type {ApplicationInstance, TickEvent} from 'sketch-loop'
-import type {CtxApplication, TickHandler} from 'sketch-application'
+import type {ApplicationInstance} from 'sketch-loop'
+import type {TickHandler} from 'sketch-application'
 import type {BaseWorld} from '@ca/world'
 
-import {Point, wrap} from 'mathutil'
+import {Point} from 'mathutil'
 import {RateLimiter} from '@ca/rate-limiter'
 import {Trace} from '@ca/trace'
 import {World} from '@ca/world'

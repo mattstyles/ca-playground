@@ -1,0 +1,30 @@
+{
+  "name": "@ca/struct",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./point": {
+      "default": "./src/point.ts" 
+    }
+  },
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.2",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^0.34.6"
+  }
+}
