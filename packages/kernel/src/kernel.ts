@@ -131,7 +131,9 @@ const kernelGol = [
   [1, 1],
 ]
 /**
- * Specialises kernel that is a little faster for calculating the value of all neighbouring cells (ignoring the origin) using the Moore shaped kernel. Convolution used by Conways Game of Life.
+ * Specialised kernel that is a little faster for calculating the value of all neighbouring cells (ignoring the origin) using the Moore shaped kernel.
+ * Convolution used by Conways Game of Life.
+ * Rules for next state are encoded separately.
  *
  * @param idx - index of the origin cell
  * @param size - point describing dimensions of the source array

@@ -48,7 +48,7 @@ export class Simulation implements BaseSimulation {
     this.rateLimiter = new RateLimiter(this.updateFps)
     this.rateLimiter.register(this.update)
 
-    setInitialState('random', this.world)
+    setInitialState('blinky', this.world)
     this.#applyActions()
 
     // Set trace
@@ -102,6 +102,7 @@ export class Simulation implements BaseSimulation {
 
     let value = 0
     let neighbours = 0
+    let nextState = 0
 
     // @TODO won't handle edges
     for (let idx = 0; idx < this.world.data.length; idx++) {
@@ -114,16 +115,27 @@ export class Simulation implements BaseSimulation {
       neighbours = convolveGol(idx, this.world.size.pos, this.world.data)
 
       // Starvation and competition
-      if (value === 1) {
-        if (neighbours < 2 || neighbours > 3) {
-          this.actions.add([idx, 0])
-        }
-        continue
-      }
+      // if (value === 1) {
+      //   if (neighbours < 2 || neighbours > 3) {
+      //     this.actions.add([idx, 0])
+      //   }
+      //   continue
+      // }
 
-      // Birth
-      if (neighbours === 3) {
-        this.actions.add([idx, 1])
+      // // Birth
+      // if (neighbours === 3) {
+      //   this.actions.add([idx, 1])
+      // }
+
+      // Rules application
+      // This is very slow as it adds a mutation to list even though it does not need to
+      // this.actions.add([idx, stateRules[value][neighbours]])
+      // // This is _ever_ so slightly slower than the if branches above
+      nextState = stateRules[value][neighbours]
+      // Using a 1d or 2d rule set makes no difference
+      // nextState = stateRules[neighbours + value * 9]
+      if (nextState !== value) {
+        this.actions.add([idx, nextState])
       }
     }
 
@@ -198,3 +210,16 @@ const initialStateStrategy = {
     trace.set('Initial random population:', p.toFixed(3))
   },
 }
+
+// GoL
+// const stateRules = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]
+const stateRules = [
+  [0, 0, 0, 1, 0, 0, 0, 0, 0],
+  [0, 0, 1, 1, 0, 0, 0, 0, 0],
+]
+
+// Caves
+// const stateRules = [
+//   [0, 0, 0, 0, 0, 1, 1, 1, 1],
+//   [0, 0, 0, 0, 1, 1, 1, 1, 1],
+// ]
